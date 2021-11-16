@@ -1,0 +1,43 @@
+{
+  // presets 告诉 babel 源码使用了哪些新的语法特性。
+  "presets": [
+    [
+      "env",
+      {
+        "modules": false
+      }
+    ],
+    "stage-2"
+  ],
+  // 生成的文件中，不产生注释, 会使 /* webpackChunkName: 'helloWorld' */ 失效
+  // "comments": false,
+  "plugins": [
+    [
+      // babel-plugin-transform-runtime 减少冗余代码，依赖 babel-runtime
+      "transform-runtime",
+      {
+        "helpers": true,
+        "polyfill": false,
+        "regenerator": true,
+        "moduleName": "babel-runtime"
+      }
+    ]
+  ],
+  "env": {
+    // 测试环境，test 是提前设置的环境变量，如果没有设置BABEL_ENV, 则使用NODE_ENV，如果都没有设置默认就是development
+    "test": {
+      "presets": [
+        "env",
+        "stage-2"
+      ],
+      // instanbul是一个用来测试转码后代码的工具
+      "plugins": [
+        "istanbul"
+      ]
+    }
+  },
+  //添加忽略项
+  "ignore": [
+    "./dist",
+  ]
+}
