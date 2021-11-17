@@ -34,14 +34,14 @@
 <script>
 import { raf } from './utils/raf';
 import Slide from './utils/slide';
-import { formatTabs, debounce } from './utils/helper';
+import { formatTabs, throttle } from './utils/helper';
 
 export default {
   props: {
     value: { type: Number, default: 0 },
     tabs: { type: Array, default: () => [] }, // tabs
     duration: { type: Number, default: 300 }, // tab横向滚动速率
-    tidy: { type: Boolean, default: true }, // 是否开启, 上滑隐藏，下滑展示。
+    tidy: { type: Boolean, default: true }, // 是否开启 上滑隐藏，下滑展示 功能。
     isSticky: { type: Boolean, default: true }, // 控制吸顶
     stickyTop: { type: Number, default: 0 }, // null 不做吸顶
   },
@@ -50,7 +50,7 @@ export default {
       tabIndex: -1,
       slide: null,
       style: { transform: 'translate3d(0%, 0, 0)', transition: '0ms' },
-      debounceScroll: null,
+      throttleScroll: null,
       lastTop: 0,
     };
   },
@@ -85,7 +85,7 @@ export default {
         this.style = { transform: e.transform, transition: e.transition };
       });
 
-      this.debounceScroll = debounce(this.onScroll);
+      this.throttleScroll = throttle(this.onScroll);
       this.bindScroll();
     }
   },
@@ -132,11 +132,11 @@ export default {
     },
 
     bindScroll() {
-      window.addEventListener('scroll', this.debounceScroll);
+      window.addEventListener('scroll', this.throttleScroll);
     },
 
     removeScroll() {
-      window.removeEventListener('scroll', this.debounceScroll);
+      window.removeEventListener('scroll', this.throttleScroll);
     },
 
     // 操作tabs导航栏的显示与隐藏
@@ -149,7 +149,9 @@ export default {
       const m = 'translateY(-500%)';
       const dis = 80;
       console.log(ST, this.lastTop, this.$refs.tabs.style.transform);
-      if (!this.tidy && Math.abs(ST - lastTop) < dis) return;
+
+      if (!this.tidy || Math.abs(ST - this.lastTop) < dis) return;
+
       if (ST > this.lastTop && this.slide.wasSticky()) {
         // 上滑， 隐藏
         this.$refs.tabs.style.transform = m;
