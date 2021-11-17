@@ -90,16 +90,15 @@ export default class Slide extends Emitter {
 
       this.index = this.index + direction;
       this.handleEndFrames();
-      setTimeout(() => {
-        // 避免白屏
-        formatTabs(this.tabs, this.index);
-      }, 0);
-    } else {
-      formatTabs(this.tabs, this.index);
     }
 
     this.animate(-this.index * 100);
     this.recoverScroll();
+
+    setTimeout(() => {
+      formatTabs(this.tabs, this.index);
+    }, 300);
+    console.log('touchend');
   };
 
   // 横滑，横向角度 > 45度

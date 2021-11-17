@@ -1,14 +1,16 @@
+import Vue from 'vue';
 // 洗一下数据
 export const formatTabs = (tabs, tabIndex) => {
   tabs.forEach((tab, idx) => {
     if (idx === tabIndex) {
-      tab._height = 'auto';
-      tab._overflow = 'visible';
+      Vue.prototype.$set(tab, '_height', 'auto');
+      Vue.prototype.$set(tab, '_overflow', 'visible');
     } else {
-      tab._height = 0;
-      tab._overflow = 'hidden';
+      Vue.prototype.$set(tab, '_height', 0);
+      Vue.prototype.$set(tab, '_overflow', 'hidden');
     }
   });
+  console.log('tabs->', tabs);
 };
 
 export const throttle = (fn, delay = 200) => {

@@ -147,8 +147,8 @@ export default {
       const ST = Math.max(BD.scrollTop, DE.scrollTop);
 
       const m = 'translateY(-500%)';
-      const dis = 80;
-      console.log(ST, this.lastTop, this.$refs.tabs.style.transform);
+      const dis = 50;
+      // console.log(ST, this.lastTop, this.$refs.tabs.style.transform);
 
       if (!this.tidy || Math.abs(ST - this.lastTop) < dis) return;
 
