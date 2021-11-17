@@ -1,6 +1,6 @@
 <template>
   <div class="tabview">
-    <div class="wrap" ref="tabs" v-if="!tidy || tabs.length > 1" :style="styleTabs">
+    <div class="nav-wrap" ref="tabs" v-if="tabs.length > 1" :style="styleTabs">
       <ul>
         <li
           class="item"
@@ -14,8 +14,17 @@
       </ul>
     </div>
     <section class="box-view">
-      <div ref="roller" class="panes" :style="style">
-        <div class="page-wrap" v-for="(item, index) in tabs" :key="index">
+      <div ref="roller" class="roller" :style="style">
+        <div
+          class="page-wrap"
+          v-for="(item, index) in tabs"
+          :key="index"
+          :style="{
+            'margin-top': (item._marginTop || 0) + 'px',
+            height: item._height,
+            overflow: item._overflow,
+          }"
+        >
           <slot :name="index"></slot>
         </div>
       </div>
@@ -25,34 +34,36 @@
 <script>
 import { raf } from './utils/raf';
 import Slide from './utils/slide';
+import { formatTabs, debounce } from './utils/helper';
 
 export default {
   props: {
     value: { type: Number, default: 0 },
-    tabs: { type: Array, default: () => [] },
-    duration: { type: Number, default: 300 },
-    tidy: { type: Boolean, default: false }, // 控制显隐
-    capacity: { type: Number, default: 4 },
-    tabStickyTop: { type: Number, default: null }, // null 不做吸顶
+    tabs: { type: Array, default: () => [] }, // tabs
+    duration: { type: Number, default: 300 }, // tab横向滚动速率
+    tidy: { type: Boolean, default: true }, // 是否开启, 上滑隐藏，下滑展示。
+    isSticky: { type: Boolean, default: true }, // 控制吸顶
+    stickyTop: { type: Number, default: 0 }, // null 不做吸顶
   },
   data() {
     return {
       tabIndex: -1,
       slide: null,
-      style: { transform: 'translateX(0%)', transition: '0ms' },
-      throttleScroll: null,
+      style: { transform: 'translate3d(0%, 0, 0)', transition: '0ms' },
+      debounceScroll: null,
+      lastTop: 0,
     };
   },
   computed: {
     styleTabs() {
-      if (this.tabStickyTop === null) {
-        return '';
+      if (this.isSticky) {
+        return {
+          position: 'sticky',
+          top: `${this.stickyTop}px`,
+          'z-index': '999',
+        };
       }
-      return {
-        position: 'sticky',
-        top: `${this.tabStickyTop}px`,
-        'z-index': '999',
-      };
+      return '';
     },
   },
   mounted() {
@@ -61,19 +72,28 @@ export default {
       this.$nextTick(() => {
         this.animateTab(false);
       });
+      // 洗一下数据
+      formatTabs(this.tabs, this.tabIndex);
       this.slide = new Slide({
+        tabsEl: this.$refs.tabs,
         roller: this.$refs.roller,
         index: this.tabIndex,
+        tabs: this.tabs,
+        stickyTop: this.stickyTop,
       }).on('next', e => {
         this.tabIndex = e.index;
         this.style = { transform: e.transform, transition: e.transition };
       });
+
+      this.debounceScroll = debounce(this.onScroll);
+      this.bindScroll();
     }
   },
   destoryed() {
     if (this.slide) {
       this.slide.release();
     }
+    this.removeScroll();
   },
   methods: {
     setIndex(index) {
@@ -112,11 +132,34 @@ export default {
     },
 
     bindScroll() {
-      window.addEventListener('scroll', this.throttleScroll);
+      window.addEventListener('scroll', this.debounceScroll);
     },
 
     removeScroll() {
-      window.removeEventListener('scroll', this.throttleScroll);
+      window.removeEventListener('scroll', this.debounceScroll);
+    },
+
+    // 操作tabs导航栏的显示与隐藏
+    onScroll(e) {
+      // console.log(e);
+      const BD = document.body;
+      const DE = document.documentElement;
+      const ST = Math.max(BD.scrollTop, DE.scrollTop);
+
+      const m = 'translateY(-500%)';
+      const dis = 80;
+      console.log(ST, this.lastTop, this.$refs.tabs.style.transform);
+      if (!this.tidy && Math.abs(ST - lastTop) < dis) return;
+      if (ST > this.lastTop && this.slide.wasSticky()) {
+        // 上滑， 隐藏
+        this.$refs.tabs.style.transform = m;
+      } else if (ST < this.lastTop && this.$refs.tabs.style.transform === m) {
+        // 下滑，漏出
+
+        this.$refs.tabs.style.transform = 'translateY(0)';
+      }
+
+      this.lastTop = ST;
     },
   },
 };
@@ -124,13 +167,14 @@ export default {
 <style lang="scss" scoped>
 .tabview {
   position: relative;
-  .wrap {
+  .nav-wrap {
     background: #fff;
     border-bottom: 1px solid #ccc;
     overflow: hidden;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     width: 100%;
+    transition: transform 0.3s ease;
     &::-webkit-scrollbar {
       display: none;
     }
@@ -152,12 +196,19 @@ export default {
   .box-view {
     width: 100%;
     overflow-x: hidden;
-    .panes {
-      white-space: nowrap;
-      // transition: transform 0.3s ease;
+    -webkit-overflow-scrolling: touch;
+    &::-webkit-scrollbar {
+      width: 0 !important;
+    }
+    -ms-overflow-style: none;
+    overflow: -moz-scrollbars-none;
+    .roller {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
       .page-wrap {
         width: 100%;
-        display: inline-block;
+        flex-shrink: 0;
       }
     }
   }
