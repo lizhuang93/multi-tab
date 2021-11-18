@@ -37,46 +37,46 @@ export default {
           code: 'KJ',
           count: 50,
         },
-        {
-          label: '财经1',
-          code: 'CJ1',
-          count: 20,
-        },
-        {
-          label: '科技1',
-          code: 'KJ1',
-          count: 30,
-        },
-        {
-          label: '财经2',
-          code: 'CJ2',
-          count: 40,
-        },
-        {
-          label: '科技2',
-          code: 'KJ2',
-          count: 90,
-        },
-        {
-          label: '财经3',
-          code: 'CJ3',
-          count: 70,
-        },
-        {
-          label: '科技3',
-          code: 'KJ3',
-          count: 60,
-        },
-        {
-          label: '财经4',
-          code: 'CJ4',
-          count: 2000,
-        },
-        {
-          label: '科技4',
-          code: 'KJ4',
-          count: 10,
-        },
+        // {
+        //   label: '财经1',
+        //   code: 'CJ1',
+        //   count: 70,
+        // },
+        // {
+        //   label: '科技1',
+        //   code: 'KJ1',
+        //   count: 90,
+        // },
+        // {
+        //   label: '财经2',
+        //   code: 'CJ2',
+        //   count: 50,
+        // },
+        // {
+        //   label: '科技2',
+        //   code: 'KJ2',
+        //   count: 90,
+        // },
+        // {
+        //   label: '财经3',
+        //   code: 'CJ3',
+        //   count: 70,
+        // },
+        // {
+        //   label: '科技3',
+        //   code: 'KJ3',
+        //   count: 60,
+        // },
+        // {
+        //   label: '财经4',
+        //   code: 'CJ4',
+        //   count: 2000,
+        // },
+        // {
+        //   label: '科技4',
+        //   code: 'KJ4',
+        //   count: 200,
+        // },
       ],
       tabIndex: 0,
     };

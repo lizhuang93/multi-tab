@@ -14,18 +14,25 @@
       </ul>
     </div>
     <section class="box-view">
-      <div ref="roller" class="roller" :style="style">
+      <div ref="roller" class="roller">
         <div
           class="page-wrap"
           v-for="(item, index) in tabs"
           :key="index"
           :style="{
-            'margin-top': (item._marginTop || 0) + 'px',
-            height: item._height,
-            overflow: item._overflow,
+            transform: transform,
+            'transition-duration': transitionTime,
           }"
         >
-          <slot :name="index"></slot>
+          <div
+            :style="{
+              'margin-top': (item._marginTop || 0) + 'px',
+              height: item._height,
+              overflow: item._overflow,
+            }"
+          >
+            <slot :name="index"></slot>
+          </div>
         </div>
       </div>
     </section>
@@ -49,7 +56,8 @@ export default {
     return {
       tabIndex: -1,
       slide: null,
-      style: { transform: 'translate3d(0%, 0, 0)', transition: '0ms' },
+      transform: 'translate3d(0%, 0, 0)',
+      transitionTime: '0ms',
       throttleScroll: null,
       lastTop: 0,
     };
@@ -81,8 +89,11 @@ export default {
         tabs: this.tabs,
         stickyTop: this.stickyTop,
       }).on('next', e => {
-        this.tabIndex = e.index;
-        this.style = { transform: e.transform, transition: e.transition };
+        this.$nextTick(() => {
+          this.tabIndex = e.index;
+          this.transform = e.transform;
+          this.transitionTime = e.transition;
+        });
       });
 
       this.throttleScroll = throttle(this.onScroll);
@@ -141,6 +152,8 @@ export default {
 
     // 操作tabs导航栏的显示与隐藏
     onScroll(e) {
+      debounce(formatTabs.bind(null, this.tabs, this.tabIndex), 300)();
+
       // console.log(e);
       const BD = document.body;
       const DE = document.documentElement;
@@ -163,8 +176,6 @@ export default {
       }
 
       this.lastTop = ST;
-
-      debounce(formatTabs.bind(null, this.tabs, this.tabIndex), 300)();
     },
   },
 };
@@ -179,7 +190,7 @@ export default {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     width: 100%;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s linear;
     &::-webkit-scrollbar {
       display: none;
     }
@@ -214,6 +225,8 @@ export default {
       .page-wrap {
         width: 100%;
         flex-shrink: 0;
+        transition-property: transform;
+        transition-timing-function: linear;
       }
     }
   }
