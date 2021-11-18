@@ -13,7 +13,7 @@ export const formatTabs = (tabs, tabIndex) => {
   console.log('tabs->', tabs);
 };
 
-export const throttle = (fn, delay = 200) => {
+export const throttle = (fn, delay = 100) => {
   let last = 0;
   return function(...args) {
     let now = Date.now();

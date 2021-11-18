@@ -34,14 +34,14 @@
 <script>
 import { raf } from './utils/raf';
 import Slide from './utils/slide';
-import { formatTabs, throttle } from './utils/helper';
+import { formatTabs, throttle, debounce } from './utils/helper';
 
 export default {
   props: {
     value: { type: Number, default: 0 },
     tabs: { type: Array, default: () => [] }, // tabs
     duration: { type: Number, default: 300 }, // tab横向滚动速率
-    tidy: { type: Boolean, default: true }, // 是否开启 上滑隐藏，下滑展示 功能。
+    tidy: { type: Boolean, default: false }, // 是否开启 上滑自动隐藏tab，下滑自动展示tab功能。
     isSticky: { type: Boolean, default: true }, // 控制吸顶
     stickyTop: { type: Number, default: 0 }, // null 不做吸顶
   },
@@ -146,7 +146,7 @@ export default {
       const DE = document.documentElement;
       const ST = Math.max(BD.scrollTop, DE.scrollTop);
 
-      const m = 'translateY(-500%)';
+      const m = 'translateY(-100%)';
       const dis = 50;
       // console.log(ST, this.lastTop, this.$refs.tabs.style.transform);
 
@@ -155,13 +155,16 @@ export default {
       if (ST > this.lastTop && this.slide.wasSticky()) {
         // 上滑， 隐藏
         this.$refs.tabs.style.transform = m;
+        this.$refs.tabs.style.zIndex = -1;
       } else if (ST < this.lastTop && this.$refs.tabs.style.transform === m) {
         // 下滑，漏出
-
         this.$refs.tabs.style.transform = 'translateY(0)';
+        this.$refs.tabs.style.zIndex = 999;
       }
 
       this.lastTop = ST;
+
+      debounce(formatTabs.bind(null, this.tabs, this.tabIndex), 300)();
     },
   },
 };
