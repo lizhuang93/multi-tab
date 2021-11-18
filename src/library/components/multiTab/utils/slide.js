@@ -1,7 +1,6 @@
 import Env from './Env';
 import Emitter from './emitter';
-import { getOffset, formatTabs } from './helper';
-import { raf } from './raf.js';
+import { getOffset, handleTabs } from './helper';
 
 export default class Slide extends Emitter {
   constructor(params) {
@@ -13,7 +12,7 @@ export default class Slide extends Emitter {
     this.stickyTop = params.stickyTop;
 
     this.width = this.roller.offsetWidth;
-    this.frames = this.roller.children;
+    this.frames = Array.from(this.roller.children);
     this.rollerOT = getOffset(this.roller).top;
     this.tabsOH = this.tabsEl.offsetHeight;
 
@@ -31,9 +30,9 @@ export default class Slide extends Emitter {
   }
 
   // 抛出事件
-  animate(offset, transition = '300ms') {
+  animate(offset, { time = '300ms', type = 'move' } = {}) {
     const transform = `translate3d(${offset}%, 0, 0)`;
-    this.emit('next', { index: this.index, transform, transition });
+    this.emit('next', { index: this.index, transform, time, type });
   }
 
   // 拖拽开始
@@ -44,7 +43,9 @@ export default class Slide extends Emitter {
     this.startY = e.touches[0].clientY;
 
     this.startClientY = this.roller.getBoundingClientRect().y;
-    this.handleStartFrames();
+
+    this.handleStartFrames.did = false;
+    console.log('touchstart');
   };
 
   // 拖拽过程
@@ -58,6 +59,10 @@ export default class Slide extends Emitter {
     if (!this.wasSticky()) return;
 
     if (this.isSwipe(disX, disY)) {
+      if (!this.handleStartFrames.did) {
+        this.handleStartFrames();
+        this.handleStartFrames.did = true;
+      }
       e.preventDefault();
 
       // 不移动场景: 第一页 && 右滑 || 最后一页 && 左滑
@@ -66,13 +71,15 @@ export default class Slide extends Emitter {
         (this.index >= this.frames.length - 1 && this.moveX < this.startX);
       if (disableSwipe) return;
 
-      this.animate(((this.moveX - this.startX) / this.width) * 100 - this.index * 100, 0);
+      this.animate(((this.moveX - this.startX) / this.width) * 100 - this.index * 100, { time: 0 });
       this.disableScroll();
     }
   };
 
   // 拖拽结束
   touchend = e => {
+    if (this.canScrollY) return;
+
     this.endX = e.changedTouches[0].clientX;
     this.endY = e.changedTouches[0].clientY;
 
@@ -94,12 +101,9 @@ export default class Slide extends Emitter {
       this.handleEndFrames();
     }
 
-    this.animate(-this.index * 100);
+    this.animate(-this.index * 100, { type: 'end' });
     this.recoverScroll();
 
-    setTimeout(() => {
-      formatTabs(this.tabs, this.index);
-    }, 300);
     console.log('touchend');
   };
 
@@ -111,20 +115,24 @@ export default class Slide extends Emitter {
 
   // 恢复body滚动行为，为了横竖滚动互斥
   recoverScroll() {
+    this.canScrollY = true;
     document.body.style.overflowY = 'scroll';
   }
   // 禁止doby滚动行为，为了横竖滚动互斥
   disableScroll() {
+    this.canScrollY = false;
     document.body.style.overflowY = 'hidden';
   }
 
   // 定位跳转
   go(index) {
     this.index = index;
-    this.animate(-this.index * 100);
+    console.log('go-index------');
+    handleTabs(this.tabs, index, { showAll: true }); // 所有frames height置为auto。
+    this.animate(-this.index * 100, { type: 'end' });
   }
 
-  // 处理其他frames
+  // 横向滚动之前处理好其他frames
   handleStartFrames() {
     const BD = document.body;
     const DE = document.documentElement;
@@ -133,7 +141,7 @@ export default class Slide extends Emitter {
     this.tabs.forEach((tab, idx) => {
       tab._height = 'auto';
       tab._overflow = 'visible';
-      console.log(tab._height);
+      console.log('f', this.frames[idx].children[0]);
       if (this.index !== idx) {
         const ST = tab._scrollTop || 0;
         if (ST > 0) {
@@ -152,10 +160,9 @@ export default class Slide extends Emitter {
   handleEndFrames() {
     // 此时的已index指向目的页
     const scrollTop = this.ST - this.tabs[this.index]._marginTop; // 目的页 的scrollTop
-    // Array.from(this.frames)[this.index].style.marginTop = '0';
-    this.tabs[this.index]._marginTop = 0; // 目的页 置0
     document.body.scrollTop = scrollTop;
     document.documentElement.scrollTop = scrollTop;
+    this.tabs[this.index]._marginTop = 0; // 目的页 置0
 
     // 处理其他页
     this.tabs.forEach((tab, idx) => {

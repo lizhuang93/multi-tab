@@ -2,9 +2,9 @@
   <div id="">
     <div style="height:100px;background:#ccc"></div>
     <!-- <div style="height:50px;background:#a8a8a8;position:sticky;top:0"></div> -->
-    <ex-tabs :tabs="tabs" v-model="tabIndex">
+    <ex-tabs :tabList="tabList" v-model="tabIndex">
       <div
-        v-for="(item, index) in tabs"
+        v-for="(item, index) in tabList"
         :key="index"
         :slot="index"
         :style="`background: #${index + 5}${index + 5}${index + 5}`"
@@ -26,16 +26,16 @@ export default {
   props: {},
   data() {
     return {
-      tabs: [
+      tabList: [
         {
           label: '财经',
           code: 'CJ',
-          count: 100,
+          count: 50,
         },
         {
           label: '科技',
           code: 'KJ',
-          count: 50,
+          count: 600,
         },
         // {
         //   label: '财经1',

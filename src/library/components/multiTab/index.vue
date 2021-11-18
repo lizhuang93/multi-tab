@@ -41,12 +41,12 @@
 <script>
 import { raf } from './utils/raf';
 import Slide from './utils/slide';
-import { formatTabs, throttle, debounce } from './utils/helper';
+import { formatTabs, handleTabs, throttle, debounce } from './utils/helper';
 
 export default {
   props: {
     value: { type: Number, default: 0 },
-    tabs: { type: Array, default: () => [] }, // tabs
+    tabList: { type: Array, default: () => [] }, // tabs
     duration: { type: Number, default: 300 }, // tab横向滚动速率
     tidy: { type: Boolean, default: false }, // 是否开启 上滑自动隐藏tab，下滑自动展示tab功能。
     isSticky: { type: Boolean, default: true }, // 控制吸顶
@@ -55,6 +55,7 @@ export default {
   data() {
     return {
       tabIndex: -1,
+      tabs: [],
       slide: null,
       transform: 'translate3d(0%, 0, 0)',
       transitionTime: '0ms',
@@ -74,14 +75,21 @@ export default {
       return '';
     },
   },
-  mounted() {
-    if (this.tabs.length > 1) {
+  created() {
+    if (this.tabList.length > 1) {
       this.tabIndex = this.value;
+      // 洗一下数据
+      this.tabs = formatTabs(this.tabList, this.tabIndex);
+      handleTabs(this.tabs, this.tabIndex);
+    }
+  },
+  mounted() {
+    if (this.tabList.length > 1) {
       this.$nextTick(() => {
         this.animateTab(false);
       });
-      // 洗一下数据
-      formatTabs(this.tabs, this.tabIndex);
+
+      console.log('mounted------');
       this.slide = new Slide({
         tabsEl: this.$refs.tabs,
         roller: this.$refs.roller,
@@ -89,11 +97,15 @@ export default {
         tabs: this.tabs,
         stickyTop: this.stickyTop,
       }).on('next', e => {
-        this.$nextTick(() => {
-          this.tabIndex = e.index;
-          this.transform = e.transform;
-          this.transitionTime = e.transition;
-        });
+        console.log('e', e);
+        this.tabIndex = e.index;
+        this.transform = e.transform;
+        this.transitionTime = e.time;
+        if (e.type === 'end') {
+          setTimeout(() => {
+            handleTabs(this.tabs, this.tabIndex);
+          }, 300);
+        }
       });
 
       this.throttleScroll = throttle(this.onScroll);
@@ -112,6 +124,7 @@ export default {
       this.animateTab();
       this.$emit('input', index);
       this.$emit('click', index, this.tabs[index]);
+      this.slide.go(index);
     },
     // 标签滚动
     //  trans表示是否需要动画过度 (初始化则不需要)
@@ -152,7 +165,7 @@ export default {
 
     // 操作tabs导航栏的显示与隐藏
     onScroll(e) {
-      debounce(formatTabs.bind(null, this.tabs, this.tabIndex), 300)();
+      console.log('onSroll------');
 
       // console.log(e);
       const BD = document.body;
