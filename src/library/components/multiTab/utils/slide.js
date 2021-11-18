@@ -60,9 +60,11 @@ export default class Slide extends Emitter {
 
     if (this.isSwipe(disX, disY)) {
       if (!this.handleStartFrames.did) {
+        // 横滑才执行，只执行一次
         this.handleStartFrames();
         this.handleStartFrames.did = true;
       }
+
       e.preventDefault();
 
       // 不移动场景: 第一页 && 右滑 || 最后一页 && 左滑
@@ -103,7 +105,6 @@ export default class Slide extends Emitter {
 
     this.animate(-this.index * 100, { type: 'end' });
     this.recoverScroll();
-
     console.log('touchend');
   };
 
@@ -160,9 +161,10 @@ export default class Slide extends Emitter {
   handleEndFrames() {
     // 此时的已index指向目的页
     const scrollTop = this.ST - this.tabs[this.index]._marginTop; // 目的页 的scrollTop
+    Array.from(this.frames)[this.index].children[0].style.marginTop = 0; // 目的页 置0
+    this.tabs[this.index]._marginTop = 0; // 目的页 置0
     document.body.scrollTop = scrollTop;
     document.documentElement.scrollTop = scrollTop;
-    this.tabs[this.index]._marginTop = 0; // 目的页 置0
 
     // 处理其他页
     this.tabs.forEach((tab, idx) => {

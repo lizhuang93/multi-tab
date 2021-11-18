@@ -1,11 +1,11 @@
 <template>
   <div class="tabview">
-    <div class="nav-wrap" ref="tabs" v-if="tabs.length > 1" :style="styleTabs">
+    <div class="nav-wrap" ref="tabs" v-if="tabList.length > 1" :style="styleTabs">
       <ul>
         <li
           class="item"
           :class="{ active: tabIndex === idx }"
-          v-for="(tab, idx) in tabs"
+          v-for="(tab, idx) in tabList"
           :key="idx"
           @click="setIndex(idx)"
         >
@@ -79,7 +79,7 @@ export default {
     if (this.tabList.length > 1) {
       this.tabIndex = this.value;
       // 洗一下数据
-      this.tabs = formatTabs(this.tabList, this.tabIndex);
+      this.tabs = formatTabs(JSON.parse(JSON.stringify(this.tabList)), this.tabIndex);
       handleTabs(this.tabs, this.tabIndex);
     }
   },
@@ -98,13 +98,16 @@ export default {
         stickyTop: this.stickyTop,
       }).on('next', e => {
         console.log('e', e);
-        this.tabIndex = e.index;
         this.transform = e.transform;
         this.transitionTime = e.time;
+        setTimeout(() => {
+          // 为了不影响滑动性能
+          this.setIndex(e.index, { isClick: false });
+        }, 0);
         if (e.type === 'end') {
           setTimeout(() => {
             handleTabs(this.tabs, this.tabIndex);
-          }, 300);
+          }, 350);
         }
       });
 
@@ -119,12 +122,14 @@ export default {
     this.removeScroll();
   },
   methods: {
-    setIndex(index) {
+    setIndex(index, { isClick = true } = {}) {
       this.tabIndex = index;
       this.animateTab();
       this.$emit('input', index);
       this.$emit('click', index, this.tabs[index]);
-      this.slide.go(index);
+      if (isClick) {
+        this.slide.go(index);
+      }
     },
     // 标签滚动
     //  trans表示是否需要动画过度 (初始化则不需要)

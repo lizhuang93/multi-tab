@@ -14,6 +14,10 @@
         </div>
       </div>
     </ex-tabs>
+    <!-- <div ref="page" style="background: #eee;margin-top:2000px">
+      <p v-for="n in 1000" :key="n">page-------------------------- {{ n }}</p>
+    </div>
+    <button style="position: fixed; bottom: 0" @click="handle">handle</button> -->
   </div>
 </template>
 
@@ -33,50 +37,50 @@ export default {
           count: 50,
         },
         {
-          label: '科技',
+          label: '科技2',
           code: 'KJ',
-          count: 600,
+          count: 60,
         },
-        // {
-        //   label: '财经1',
-        //   code: 'CJ1',
-        //   count: 70,
-        // },
-        // {
-        //   label: '科技1',
-        //   code: 'KJ1',
-        //   count: 90,
-        // },
-        // {
-        //   label: '财经2',
-        //   code: 'CJ2',
-        //   count: 50,
-        // },
-        // {
-        //   label: '科技2',
-        //   code: 'KJ2',
-        //   count: 90,
-        // },
-        // {
-        //   label: '财经3',
-        //   code: 'CJ3',
-        //   count: 70,
-        // },
-        // {
-        //   label: '科技3',
-        //   code: 'KJ3',
-        //   count: 60,
-        // },
-        // {
-        //   label: '财经4',
-        //   code: 'CJ4',
-        //   count: 2000,
-        // },
-        // {
-        //   label: '科技4',
-        //   code: 'KJ4',
-        //   count: 200,
-        // },
+        {
+          label: '财经3',
+          code: 'CJ1',
+          count: 70,
+        },
+        {
+          label: '科技4',
+          code: 'KJ1',
+          count: 90,
+        },
+        {
+          label: '财经5',
+          code: 'CJ2',
+          count: 50,
+        },
+        {
+          label: '科技6',
+          code: 'KJ2',
+          count: 90,
+        },
+        {
+          label: '财经7',
+          code: 'CJ3',
+          count: 70,
+        },
+        {
+          label: '科技8',
+          code: 'KJ3',
+          count: 60,
+        },
+        {
+          label: '财经9',
+          code: 'CJ4',
+          count: 90,
+        },
+        {
+          label: '科技10',
+          code: 'KJ4',
+          count: 90,
+        },
       ],
       tabIndex: 0,
     };
@@ -86,7 +90,11 @@ export default {
 
   mounted() {},
 
-  methods: {},
+  methods: {
+    handle() {
+      this.$refs.page.style.marginTop = 0;
+    },
+  },
 };
 </script>
 
