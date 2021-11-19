@@ -29,6 +29,7 @@
               'margin-top': (item._marginTop || 0) + 'px',
               height: item._height,
               overflow: item._overflow,
+              'min-height': minHeight,
             }"
           >
             <slot :name="index"></slot>
@@ -59,6 +60,7 @@ export default {
       slide: null,
       transform: 'translate3d(0%, 0, 0)',
       transitionTime: '0ms',
+      minHeight: 0,
       throttleScroll: null,
       lastTop: 0,
     };
@@ -101,13 +103,14 @@ export default {
         this.transform = e.transform;
         this.transitionTime = e.time;
         setTimeout(() => {
-          // 为了不影响滑动性能
+          // 为了不影响滑动性能, 延后切换tab
           this.setIndex(e.index, { isClick: false });
-        }, 0);
+        }, 200);
         if (e.type === 'end') {
           setTimeout(() => {
             handleTabs(this.tabs, this.tabIndex);
-          }, 350);
+            this.$nextTick(this.slide.handleEndFrames.bind(this.slide));
+          }, 300);
         }
       });
 

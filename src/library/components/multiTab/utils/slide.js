@@ -30,7 +30,7 @@ export default class Slide extends Emitter {
   }
 
   // 抛出事件
-  animate(offset, { time = '300ms', type = 'move' } = {}) {
+  animate(offset, { time = '100ms', type = 'move' } = {}) {
     const transform = `translate3d(${offset}%, 0, 0)`;
     this.emit('next', { index: this.index, transform, time, type });
   }
@@ -100,7 +100,6 @@ export default class Slide extends Emitter {
       if (disableSwipe) return; // 不移动场景: 第一页右滑 || 最后一页左滑
 
       this.index = this.index + direction;
-      this.handleEndFrames();
     }
 
     this.animate(-this.index * 100, { type: 'end' });
@@ -159,12 +158,10 @@ export default class Slide extends Emitter {
 
   // 处理其他frames
   handleEndFrames() {
-    // 此时的已index指向目的页
+    // 此时的index已指向目的页
     const scrollTop = this.ST - this.tabs[this.index]._marginTop; // 目的页 的scrollTop
     Array.from(this.frames)[this.index].children[0].style.marginTop = 0; // 目的页 置0
-    this.tabs[this.index]._marginTop = 0; // 目的页 置0
-    document.body.scrollTop = scrollTop;
-    document.documentElement.scrollTop = scrollTop;
+    this.setScrollTop(scrollTop);
 
     // 处理其他页
     this.tabs.forEach((tab, idx) => {
@@ -175,8 +172,21 @@ export default class Slide extends Emitter {
         } else {
           tab._marginTop = `${scrollTop + this.tabsOH - this.rollerOT - ST}`;
         }
+      } else {
+        tab._marginTop = 0; // 目的页 置0
       }
     });
+  }
+
+  setScrollTop(scrollTop) {
+    document.body.style['-webkit-overflow-scrolling'] = 'auto';
+    document.documentElement.style['-webkit-overflow-scrolling'] = 'auto';
+
+    document.body.scrollTop = scrollTop;
+    document.documentElement.scrollTop = scrollTop;
+
+    document.body.style['-webkit-overflow-scrolling'] = 'touch';
+    document.documentElement.style['-webkit-overflow-scrolling'] = 'touch';
   }
 
   // 判定吸顶状态

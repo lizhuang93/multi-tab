@@ -14,15 +14,18 @@
         </div>
       </div>
     </ex-tabs>
-    <!-- <div ref="page" style="background: #eee;margin-top:2000px">
+    <!-- <div ref="page" style="background: #eee;margin-top:20000px">
       <p v-for="n in 1000" :key="n">page-------------------------- {{ n }}</p>
     </div>
-    <button style="position: fixed; bottom: 0" @click="handle">handle</button> -->
+    <button style="position: fixed; bottom: 0; padding: 14px 20px;" @click="handle">
+      scrollTop = 0
+    </button> -->
   </div>
 </template>
 
 <script>
 import Tabs from '../index.vue';
+
 export default {
   components: {
     'ex-tabs': Tabs,
@@ -34,12 +37,12 @@ export default {
         {
           label: '财经',
           code: 'CJ',
-          count: 50,
+          count: 500,
         },
         {
           label: '科技2',
           code: 'KJ',
-          count: 60,
+          count: 600,
         },
         {
           label: '财经3',
@@ -93,6 +96,8 @@ export default {
   methods: {
     handle() {
       this.$refs.page.style.marginTop = 0;
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
     },
   },
 };
