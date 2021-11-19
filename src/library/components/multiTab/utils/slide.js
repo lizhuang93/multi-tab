@@ -125,15 +125,18 @@ export default class Slide extends Emitter {
   }
 
   // 定位跳转
-  go(index) {
+  go(startIndex, index) {
     this.index = index;
+    this.startClientY = this.roller.getBoundingClientRect().y;
     console.log('go-index------');
-    handleTabs(this.tabs, index, { showAll: true }); // 所有frames height置为auto。
+    // handleTabs(this.tabs, index, { showAll: true }); // 所有frames height置为auto。
+    this.handleStartFrames(startIndex);
     this.animate(-this.index * 100, { type: 'end' });
   }
 
   // 横向滚动之前处理好其他frames
-  handleStartFrames() {
+  handleStartFrames(startIndex = -1) {
+    const index = startIndex >= 0 ? startIndex : this.index;
     const BD = document.body;
     const DE = document.documentElement;
     this.ST = Math.max(BD.scrollTop, DE.scrollTop); // 开始滑动前的scrollTop
@@ -142,7 +145,7 @@ export default class Slide extends Emitter {
       tab._height = 'auto';
       tab._overflow = 'visible';
       console.log('f', this.frames[idx].children[0]);
-      if (this.index !== idx) {
+      if (index !== idx) {
         const ST = tab._scrollTop || 0;
         if (ST > 0) {
           tab._marginTop = this.ST - tab._scrollTop;

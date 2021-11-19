@@ -126,12 +126,13 @@ export default {
   },
   methods: {
     setIndex(index, { isClick = true } = {}) {
+      const startIndex = this.tabIndex;
       this.tabIndex = index;
       this.animateTab();
       this.$emit('input', index);
       this.$emit('click', index, this.tabs[index]);
       if (isClick) {
-        this.slide.go(index);
+        this.slide.go(startIndex, index);
       }
     },
     // 标签滚动
