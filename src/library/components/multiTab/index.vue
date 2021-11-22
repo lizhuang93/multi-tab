@@ -1,18 +1,18 @@
 <template>
   <div class="tabview">
-    <div class="nav-wrap" ref="tabs" v-if="tabList.length > 1" :style="styleTabs">
-      <ul>
-        <li
+    <keep-alive>
+      <div class="nav-wrap" ref="tabs" :style="styleTabs">
+        <div
           class="item"
           :class="{ active: tabIndex === idx }"
           v-for="(tab, idx) in tabList"
-          :key="idx"
+          :key="tab.label"
           @click="setIndex(idx)"
         >
           {{ tab.label }}
-        </li>
-      </ul>
-    </div>
+        </div>
+      </div>
+    </keep-alive>
     <section class="box-view">
       <div ref="roller" class="roller">
         <div
@@ -22,18 +22,12 @@
           :style="{
             transform: transform,
             'transition-duration': transitionTime,
+            'margin-top': (item._marginTop || 0) + 'px',
+            height: item._height,
+            overflow: item._overflow,
           }"
         >
-          <div
-            :style="{
-              'margin-top': (item._marginTop || 0) + 'px',
-              height: item._height,
-              overflow: item._overflow,
-              'min-height': minHeight,
-            }"
-          >
-            <slot :name="index"></slot>
-          </div>
+          <slot></slot>
         </div>
       </div>
     </section>
@@ -48,7 +42,6 @@ export default {
   props: {
     value: { type: Number, default: 0 },
     tabList: { type: Array, default: () => [] }, // tabs
-    duration: { type: Number, default: 300 }, // tab横向滚动速率
     tidy: { type: Boolean, default: false }, // 是否开启 上滑自动隐藏tab，下滑自动展示tab功能。
     isSticky: { type: Boolean, default: true }, // 控制吸顶
     stickyTop: { type: Number, default: 0 }, // null 不做吸顶
@@ -60,18 +53,16 @@ export default {
       slide: null,
       transform: 'translate3d(0%, 0, 0)',
       transitionTime: '0ms',
-      minHeight: 0,
       throttleScroll: null,
       lastTop: 0,
+      duration: 200,
     };
   },
   computed: {
     styleTabs() {
       if (this.isSticky) {
         return {
-          position: 'sticky',
           top: `${this.stickyTop}px`,
-          'z-index': '999',
         };
       }
       return '';
@@ -107,10 +98,11 @@ export default {
           this.setIndex(e.index, { isClick: false });
         }, 200);
         if (e.type === 'end') {
+          // 避免滑动出现的白屏， 滑动完成再置0，
           setTimeout(() => {
             handleTabs(this.tabs, this.tabIndex);
-            this.$nextTick(this.slide.handleEndFrames.bind(this.slide));
-          }, 300);
+            this.slide.handleEndFrames();
+          }, 200);
         }
       });
 
@@ -153,7 +145,7 @@ export default {
     },
     handleScrollTab(el, from, to) {
       let count = 0;
-      const frames = Math.round(this.duration / 25);
+      const frames = Math.floor(this.duration / 25);
       const animate = () => {
         el.scrollLeft += (to - from) / frames;
         count += 1;
@@ -181,19 +173,19 @@ export default {
       const DE = document.documentElement;
       const ST = Math.max(BD.scrollTop, DE.scrollTop);
 
-      const m = 'translateY(-100%)';
+      const m = 'translate3d(0, -100%, 0)';
       const dis = 50;
       // console.log(ST, this.lastTop, this.$refs.tabs.style.transform);
 
       if (!this.tidy || Math.abs(ST - this.lastTop) < dis) return;
 
-      if (ST > this.lastTop && this.slide.wasSticky()) {
+      if (ST > this.lastTop && this.slide.didSticky()) {
         // 上滑， 隐藏
         this.$refs.tabs.style.transform = m;
         this.$refs.tabs.style.zIndex = -1;
       } else if (ST < this.lastTop && this.$refs.tabs.style.transform === m) {
         // 下滑，漏出
-        this.$refs.tabs.style.transform = 'translateY(0)';
+        this.$refs.tabs.style.transform = 'translate3d(0, 0, 0)';
         this.$refs.tabs.style.zIndex = 999;
       }
 
@@ -203,30 +195,33 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+html,
+body {
+  position: static;
+}
 .tabview {
   position: relative;
   .nav-wrap {
+    position: sticky;
     background: #fff;
     border-bottom: 1px solid #ccc;
     overflow: hidden;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     width: 100%;
-    transition: transform 0.3s linear;
+    min-height: 30px;
+    z-index: 999;
+    display: flex;
+    flex-wrap: nowrap;
+    list-style: none;
+    -webkit-overflow-scrolling: touch;
     &::-webkit-scrollbar {
       display: none;
     }
-    ul {
-      white-space: nowrap;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      li {
-        padding: 4px 9px;
-        display: inline-block;
-        &.active {
-          color: #ff4800;
-        }
+    .item {
+      padding: 4px 9px;
+      flex-shrink: 0;
+      &.active {
+        color: #ff4800;
       }
     }
   }
@@ -234,14 +229,14 @@ export default {
   .box-view {
     width: 100%;
     overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
-    &::-webkit-scrollbar {
-      width: 0 !important;
-    }
     -ms-overflow-style: none;
     overflow: -moz-scrollbars-none;
+    z-index: 0;
     .roller {
       display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      align-content: flex-start;
       flex-wrap: nowrap;
       width: 100%;
       .page-wrap {

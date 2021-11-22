@@ -30,14 +30,14 @@ export default class Slide extends Emitter {
   }
 
   // 抛出事件
-  animate(offset, { time = '100ms', type = 'move' } = {}) {
+  animate(offset, { time = '200ms', type = 'move' } = {}) {
     const transform = `translate3d(${offset}%, 0, 0)`;
     this.emit('next', { index: this.index, transform, time, type });
   }
 
   // 拖拽开始
   touchstart = e => {
-    if (!this.wasSticky()) return;
+    if (!this.didSticky()) return;
 
     this.startX = e.touches[0].clientX;
     this.startY = e.touches[0].clientY;
@@ -56,7 +56,7 @@ export default class Slide extends Emitter {
     let disX = Math.abs(this.moveX - this.startX);
     let disY = Math.abs(this.moveY - this.startY);
 
-    if (!this.wasSticky()) return;
+    if (!this.didSticky()) return;
 
     if (this.isSwipe(disX, disY)) {
       if (!this.handleStartFrames.did) {
@@ -88,7 +88,7 @@ export default class Slide extends Emitter {
     let disX = Math.abs(this.endX - this.startX);
     let disY = Math.abs(this.endY - this.startY);
 
-    if (!this.wasSticky()) return;
+    if (!this.didSticky()) return;
 
     let direction = this.endX - this.startX > 0 ? -1 : 1; // -1上一页，1下一页
     let threshold = Math.abs(this.startX - this.endX) > this.width / 3; // 滑动超过1/3，滚到下一页
@@ -107,7 +107,7 @@ export default class Slide extends Emitter {
     console.log('touchend');
   };
 
-  // 横滑，横向角度 > 45度
+  // 判定横滑，横向角度 > 45度
   isSwipe(disX, disY) {
     const clientY = this.roller.getBoundingClientRect().y;
     return clientY === this.startClientY && Math.abs(disX / disY) > 1;
@@ -159,8 +159,8 @@ export default class Slide extends Emitter {
     });
   }
 
-  // 处理其他frames
-  handleEndFrames() {
+  // 滚动结束，处理其他frames
+  handleEndFrames(e) {
     // 此时的index已指向目的页
     const scrollTop = this.ST - this.tabs[this.index]._marginTop; // 目的页 的scrollTop
     Array.from(this.frames)[this.index].children[0].style.marginTop = 0; // 目的页 置0
@@ -184,16 +184,14 @@ export default class Slide extends Emitter {
   setScrollTop(scrollTop) {
     document.body.style['-webkit-overflow-scrolling'] = 'auto';
     document.documentElement.style['-webkit-overflow-scrolling'] = 'auto';
-
     document.body.scrollTop = scrollTop;
     document.documentElement.scrollTop = scrollTop;
-
     document.body.style['-webkit-overflow-scrolling'] = 'touch';
     document.documentElement.style['-webkit-overflow-scrolling'] = 'touch';
   }
 
   // 判定吸顶状态
-  wasSticky() {
+  didSticky() {
     const top = this.tabsEl.getBoundingClientRect().y;
     return Math.abs(top - this.stickyTop) <= 1; // 允许1px误差
   }

@@ -3,12 +3,7 @@
     <div style="height:100px;background:#ccc"></div>
     <!-- <div style="height:50px;background:#a8a8a8;position:sticky;top:0"></div> -->
     <ex-tabs :tabList="tabList" v-model="tabIndex">
-      <div
-        v-for="(item, index) in tabList"
-        :key="index"
-        :slot="index"
-        :style="`background: #${index + 5}${index + 5}${index + 5}`"
-      >
+      <div v-for="(item, index) in tabList" :key="index" :style="`background: #${index + 5}${index + 5}${index + 5}`">
         <div>
           <p v-for="n in item.count" :key="n">page{{ index }} -------------------------- {{ n }}</p>
         </div>
