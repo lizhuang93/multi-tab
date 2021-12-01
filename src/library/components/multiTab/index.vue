@@ -1,17 +1,14 @@
 <template>
   <div class="tabview">
     <keep-alive>
-      <div class="nav-wrap" ref="tabs" :style="styleTabs">
-        <div
-          class="item"
-          :class="{ active: tabIndex === idx }"
-          v-for="(tab, idx) in tabList"
-          :key="tab.label"
-          @click="setIndex(idx)"
-        >
-          {{ tab.label }}
-        </div>
-      </div>
+      <tab-nav
+        :value="value"
+        ref="tabNav"
+        :tabList="tabList"
+        :class="{ 'is-sticky': this.isSticky }"
+        :styleTabs="styleTabs"
+        @click="setIndex"
+      ></tab-nav>
     </keep-alive>
     <section class="box-view">
       <div ref="roller" class="roller">
@@ -27,7 +24,7 @@
             overflow: item._overflow,
           }"
         >
-          <slot></slot>
+          <slot :name="index"></slot>
         </div>
       </div>
     </section>
@@ -38,11 +35,16 @@ import { raf } from './utils/raf';
 import Slide from './utils/slide';
 import { formatTabs, handleTabs, throttle, debounce } from './utils/helper';
 
+import TabNav from './tabNav.vue';
+
 export default {
+  components: {
+    TabNav,
+  },
   props: {
     value: { type: Number, default: 0 },
     tabList: { type: Array, default: () => [] }, // tabs
-    tidy: { type: Boolean, default: false }, // 是否开启 上滑自动隐藏tab，下滑自动展示tab功能。
+    tidy: { type: Boolean, default: true }, // 是否开启 上滑自动隐藏tab，下滑自动展示tab功能。
     isSticky: { type: Boolean, default: true }, // 控制吸顶
     stickyTop: { type: Number, default: 0 }, // null 不做吸顶
   },
@@ -51,23 +53,15 @@ export default {
       tabIndex: -1,
       tabs: [],
       slide: null,
-      transform: 'translate3d(0%, 0, 0)',
+      transform: 'translateX(0%)',
       transitionTime: '0ms',
       throttleScroll: null,
       lastTop: 0,
       duration: 200,
+      styleTabs: {},
     };
   },
-  computed: {
-    styleTabs() {
-      if (this.isSticky) {
-        return {
-          top: `${this.stickyTop}px`,
-        };
-      }
-      return '';
-    },
-  },
+  computed: {},
   created() {
     if (this.tabList.length > 1) {
       this.tabIndex = this.value;
@@ -82,9 +76,8 @@ export default {
         this.animateTab(false);
       });
 
-      console.log('mounted------');
       this.slide = new Slide({
-        tabsEl: this.$refs.tabs,
+        tabsEl: this.$refs.tabNav.$el,
         roller: this.$refs.roller,
         index: this.tabIndex,
         tabs: this.tabs,
@@ -130,16 +123,16 @@ export default {
     // 标签滚动
     //  trans表示是否需要动画过度 (初始化则不需要)
     animateTab(trans = true) {
-      if (this.$refs['tabs']) {
-        const tabs = this.$refs['tabs'];
-        const list = Array.from(tabs.querySelectorAll('.item'));
+      if (this.$refs['tabNav'].$el) {
+        const tabNavEl = this.$refs['tabNav'].$el;
+        const list = Array.from(tabNavEl.querySelectorAll('.item'));
         const item = list[this.tabIndex];
-        const { scrollLeft, offsetWidth: tabsWidth } = tabs;
+        const { scrollLeft, offsetWidth: tabsWidth } = tabNavEl;
         const { offsetLeft, offsetWidth: itemWidth } = item;
         if (trans) {
-          this.handleScrollTab(tabs, scrollLeft, offsetLeft - (tabsWidth - itemWidth) / 2);
+          this.handleScrollTab(tabNavEl, scrollLeft, offsetLeft - (tabsWidth - itemWidth) / 2);
         } else {
-          tabs.scrollLeft = offsetLeft - (tabsWidth - itemWidth) / 2;
+          tabNavEl.scrollLeft = offsetLeft - (tabsWidth - itemWidth) / 2;
         }
       }
     },
@@ -166,30 +159,57 @@ export default {
 
     // 操作tabs导航栏的显示与隐藏
     onScroll(e) {
-      console.log('onSroll------');
+      // 吸顶操作
+      if (this.isSticky && this.$refs.tabNav) {
+        let offsetHeight = 0; // nav 高度
+        let isArrivedTop = false; // 是否到达顶部
 
-      // console.log(e);
-      const BD = document.body;
-      const DE = document.documentElement;
-      const ST = Math.max(BD.scrollTop, DE.scrollTop);
+        if (this.$refs.tabNav.$el) {
+          offsetHeight = this.$refs.tabNav.$el.offsetHeight;
+        }
+        if (this.$refs.roller) {
+          isArrivedTop = this.$refs.roller.getBoundingClientRect().y <= offsetHeight;
+          if (isArrivedTop) {
+            this.$refs.tabNav.$el.style.position = 'fixed';
+            this.$refs.tabNav.$el.style.top = `${this.stickyTop}px`;
+            this.$refs.roller.style.marginTop = `${offsetHeight}px`;
+          } else {
+            this.$refs.tabNav.$el.style.position = 'sticky';
+            this.$refs.tabNav.$el.style.top = `${this.stickyTop}px`;
+            this.$refs.roller.style.marginTop = 0;
+          }
+        }
 
-      const m = 'translate3d(0, -100%, 0)';
-      const dis = 50;
-      // console.log(ST, this.lastTop, this.$refs.tabs.style.transform);
+        // 吸顶的情况下，tidy控制， 上滑自动隐藏tab，下滑自动展示tab功能。
+        const BD = document.body;
+        const DE = document.documentElement;
+        const ST = Math.max(BD.scrollTop, DE.scrollTop);
 
-      if (!this.tidy || Math.abs(ST - this.lastTop) < dis) return;
+        const m = 'translateY(-100%)';
+        const dis = 50; // 滚动距离 > 50
 
-      if (ST > this.lastTop && this.slide.didSticky()) {
-        // 上滑， 隐藏
-        this.$refs.tabs.style.transform = m;
-        this.$refs.tabs.style.zIndex = -1;
-      } else if (ST < this.lastTop && this.$refs.tabs.style.transform === m) {
-        // 下滑，漏出
-        this.$refs.tabs.style.transform = 'translate3d(0, 0, 0)';
-        this.$refs.tabs.style.zIndex = 999;
+        if (!this.tidy || Math.abs(ST - this.lastTop) < dis) return;
+
+        if (isArrivedTop) {
+          this.$refs.tabNav.$el.style.transition = 'transform 0.1s linear';
+        } else {
+          this.$refs.tabNav.$el.style.transition = 'none';
+        }
+
+        if (ST > this.lastTop && this.slide.didSticky()) {
+          // 上滑， 隐藏
+          this.$refs.tabNav.$el.style.transform = m;
+          setTimeout(() => {
+            // 等待滑动动作完成
+            this.$refs.tabNav.$el.style.zIndex = -1;
+          }, 100);
+        } else if (ST < this.lastTop && this.$refs.tabNav.$el.style.transform === m) {
+          // 下滑，漏出
+          this.$refs.tabNav.$el.style.transform = 'translateY(0px)';
+          this.$refs.tabNav.$el.style.zIndex = 999;
+        }
+        this.lastTop = ST;
       }
-
-      this.lastTop = ST;
     },
   },
 };
@@ -201,31 +221,10 @@ body {
 }
 .tabview {
   position: relative;
-  .nav-wrap {
+  .is-sticky {
     position: sticky;
-    background: #fff;
-    border-bottom: 1px solid #ccc;
-    overflow: hidden;
-    overflow-x: auto;
-    width: 100%;
-    min-height: 30px;
-    z-index: 999;
-    display: flex;
-    flex-wrap: nowrap;
-    list-style: none;
-    -webkit-overflow-scrolling: touch;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    .item {
-      padding: 4px 9px;
-      flex-shrink: 0;
-      &.active {
-        color: #ff4800;
-      }
-    }
+    top: 0;
   }
-
   .box-view {
     width: 100%;
     overflow-x: hidden;

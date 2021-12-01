@@ -3,18 +3,17 @@
     <div style="height:100px;background:#ccc"></div>
     <!-- <div style="height:50px;background:#a8a8a8;position:sticky;top:0"></div> -->
     <ex-tabs :tabList="tabList" v-model="tabIndex">
-      <div v-for="(item, index) in tabList" :key="index" :style="`background: #${index + 5}${index + 5}${index + 5}`">
+      <div
+        v-for="(item, index) in tabList"
+        :slot="index"
+        :key="index"
+        :style="`background: #${index + 5}${index + 5}${index + 5}`"
+      >
         <div>
           <p v-for="n in item.count" :key="n">page{{ index }} -------------------------- {{ n }}</p>
         </div>
       </div>
     </ex-tabs>
-    <!-- <div ref="page" style="background: #eee;margin-top:20000px">
-      <p v-for="n in 1000" :key="n">page-------------------------- {{ n }}</p>
-    </div>
-    <button style="position: fixed; bottom: 0; padding: 14px 20px;" @click="handle">
-      scrollTop = 0
-    </button> -->
   </div>
 </template>
 

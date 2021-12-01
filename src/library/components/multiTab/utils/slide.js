@@ -20,6 +20,7 @@ export default class Slide extends Emitter {
     this.roller.addEventListener('touchstart', this.touchstart, Env.supportPassive);
     this.roller.addEventListener('touchmove', this.touchmove, Env.supportPassive);
     this.roller.addEventListener('touchend', this.touchend, Env.supportPassive);
+    this.roller.addEventListener('touchcancel', this.touchend, Env.supportPassive);
   }
 
   // 释放绑定
@@ -31,7 +32,7 @@ export default class Slide extends Emitter {
 
   // 抛出事件
   animate(offset, { time = '200ms', type = 'move' } = {}) {
-    const transform = `translate3d(${offset}%, 0, 0)`;
+    const transform = type === 'move' ? `translate3d(${offset}%, 0, 0)` : `translateX(${offset}%)`;
     this.emit('next', { index: this.index, transform, time, type });
   }
 
@@ -43,7 +44,6 @@ export default class Slide extends Emitter {
     this.startY = e.touches[0].clientY;
 
     this.startClientY = this.roller.getBoundingClientRect().y;
-
     this.handleStartFrames.did = false;
     console.log('touchstart');
   };
@@ -59,6 +59,7 @@ export default class Slide extends Emitter {
     if (!this.didSticky()) return;
 
     if (this.isSwipe(disX, disY)) {
+      // 横滑才执行
       if (!this.handleStartFrames.did) {
         // 横滑才执行，只执行一次
         this.handleStartFrames();
@@ -144,7 +145,6 @@ export default class Slide extends Emitter {
     this.tabs.forEach((tab, idx) => {
       tab._height = 'auto';
       tab._overflow = 'visible';
-      console.log('f', this.frames[idx].children[0]);
       if (index !== idx) {
         const ST = tab._scrollTop || 0;
         if (ST > 0) {
