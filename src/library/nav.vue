@@ -16,16 +16,12 @@ export default {
     return {
       list: [
         {
-          path: '/demo/hugeList',
-          text: 'list组件(海量数据)',
-        },
-        {
-          path: '/demo/hugeTree',
-          text: 'tree组件(海量数据)',
-        },
-        {
           path: '/demo/multiTab',
           text: '多Tab多滚动容器',
+        },
+        {
+          path: '/demo/multiTab2',
+          text: '多Tab多滚动容器2',
         },
       ],
     };

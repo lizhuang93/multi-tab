@@ -1,14 +1,10 @@
 <template>
   <div id="">
-    <div ref="wrap" style="height:400px;background:#ccc">
-      <div>
-        <section>
-          <p ref="content" style="height:200px;background:#eee"></p>
-        </section>
+    <ex-tabs :tabList="tabList" v-model="tabIndex">
+      <div slot="header" style="height:50px;background:#a8a8a8;position:sticky;top:0">
+        fsa
       </div>
-    </div>
-    <!-- <div style="height:50px;background:#a8a8a8;position:sticky;top:0"></div> -->
-    <!-- <ex-tabs :tabList="tabList" v-model="tabIndex">
+      <!-- <div slot="nav">fas</div> -->
       <div
         v-for="(item, index) in tabList"
         :slot="index"
@@ -16,10 +12,10 @@
         :style="`background: #${index + 5}${index + 5}${index + 5}`"
       >
         <div>
-          <p v-for="n in item.count" :key="n">page{{ index }} -------------------------- {{ n }}</p>
+          <p v-for="n in item.count" :key="n">{{ n }} -------------------------- page{{ index }}</p>
         </div>
       </div>
-    </ex-tabs> -->
+    </ex-tabs>
   </div>
 </template>
 
@@ -28,7 +24,7 @@ import Tabs from '../index.vue';
 
 export default {
   components: {
-    // 'ex-tabs': Tabs,
+    'ex-tabs': Tabs,
   },
   props: {},
   data() {
@@ -91,27 +87,9 @@ export default {
 
   computed: {},
 
-  mounted() {
-    this.$refs.content.addEventListener('touchstart', e => {
-      console.log('content', e);
-      e.stopPropagation();
-    });
-    this.$refs.wrap.addEventListener(
-      'touchstart',
-      e => {
-        console.log('wrap', e);
-      },
-      true
-    );
-  },
+  mounted() {},
 
-  methods: {
-    handle() {
-      this.$refs.page.style.marginTop = 0;
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
-    },
-  },
+  methods: {},
 };
 </script>
 
