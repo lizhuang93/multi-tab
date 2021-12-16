@@ -12,7 +12,7 @@
         :style="`background: #${index + 5}${index + 5}${index + 5}`"
       >
         <div>
-          <p v-for="n in item.count" :key="n">{{ n }} -------------------------- page{{ index }}</p>
+          <p v-for="n in item.count" :key="n">{{ n }} ---------------------- page{{ index }}-{{ n }}</p>
         </div>
       </div>
     </ex-tabs>
@@ -33,7 +33,7 @@ export default {
         {
           label: '财经',
           code: 'CJ',
-          count: 500,
+          count: 50,
         },
         {
           label: '科技2',

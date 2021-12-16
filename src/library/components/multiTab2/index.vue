@@ -2,14 +2,13 @@
   <div class="multi-tab">
     <!-- 吸顶的时候展示 -->
     <!-- 导航区 -->
-    <div :class="{ 'hidden-sticky': !showSticky }">
+    <div v-if="isSticky" class="nav0" :class="{ show: arrivedTop }">
       <slot name="nav" v-if="$slots.nav"></slot>
       <tab-nav
         v-else
-        tid="123"
         :value="activeIndex"
         :tabs="tabs"
-        :isSticky="isSticky"
+        :isSticky="true"
         :stickyTop="stickyTop"
         @click="setIndex"
       ></tab-nav>
@@ -26,13 +25,14 @@
         <!-- 导航区 -->
         <div ref="nav">
           <slot name="nav" v-if="$slots.nav"></slot>
-          <tab-nav v-else :value="activeIndex" :tabs="tabs" :isSticky="false" @click="setIndex"></tab-nav>
+          <tab-nav v-else :value="activeIndex" :tabs="tabs" @click="setIndex"></tab-nav>
         </div>
 
         <!-- 侧滑区 slide -->
         <section ref="slide" class="slide-wrapper">
           <div
             class="slide-content"
+            ref="slide-content"
             :style="{
               width: rollerWidth,
               height: slideHeight,
@@ -71,7 +71,7 @@ export default {
   },
   data() {
     return {
-      showSticky: false,
+      arrivedTop: false,
       activeIndex: -1,
       tabs: [],
       bsBody: null,
@@ -85,6 +85,11 @@ export default {
       return `${this.tabs.length * 100}%`;
     },
   },
+  watch: {
+    activeIndex(newVal, oldVal) {
+      this.updateHeight();
+    },
+  },
   created() {
     if (this.tabList.length > 0) {
       this.activeIndex = this.value;
@@ -92,8 +97,6 @@ export default {
         return {
           ...n,
           _marginTop: 0,
-          _height: 'auto',
-          _overflow: 'visible',
         };
       });
     }
@@ -115,7 +118,8 @@ export default {
 
       this.bsBody.on('scroll', position => {
         const headerHeight = this.$refs['header'].offsetHeight;
-        this.showSticky = position.y <= 0 && Math.abs(position.y) > headerHeight + this.stickyTop;
+        this.arrivedTop = position.y <= this.stickyTop && Math.abs(position.y) >= headerHeight - this.stickyTop;
+        console.log('setArrivedTop', this.arrivedTop);
       });
 
       this.bsSlide = new BScroll(this.$refs['slide'], {
@@ -135,6 +139,7 @@ export default {
       });
 
       this.bsSlide.on('slideWillChange', page => {
+        console.log('page--->', page);
         this.setIndex(page.pageX, false);
       });
       this.bsSlide.on('scrollStart', this.handleStart);
@@ -150,34 +155,39 @@ export default {
   },
   methods: {
     setIndex(index, isClick = true) {
+      if (index === this.activeIndex) return;
+
+      const startIndex = this.activeIndex;
       this.activeIndex = index;
       this.$emit('input', index);
       this.$emit('click', index);
       if (isClick) {
-        this.bsSlide.goToPage(index, 0, 300);
+        this.goToPage(startIndex, index);
       }
     },
     refresh() {
-      this.$nextTick(() => {
-        this.bsBody.refresh();
-      });
+      if (this.bsBody) {
+        this.$nextTick(() => {
+          this.bsBody.refresh();
+        });
+      }
     },
-    handleStart() {
+    handleStart(startIndex = this.activeIndex) {
+      this.handleEnd.did = false;
       console.log('handleStart');
       this.ST = Math.abs(this.bsBody.y);
-      console.log('this.ST', this.ST);
+      console.log('this.ST->', this.ST);
       const slideOffsetTop =
         cache('slideOT', this.getSlideOffsetTop.bind(this)) - this.$refs['nav'].offsetHeight - this.stickyTop;
-
+      const pages = Array.from(this.$refs['slide-content'].children);
       this.tabs.forEach((item, idx) => {
-        if (this.activeIndex === idx) {
+        if (startIndex === idx) {
           // 记录自己位置
           item._scrollTop = this.ST;
         }
-
-        if (this.showSticky) {
+        if (this.arrivedTop) {
           // 吸顶, 处理其他page
-          if (this.activeIndex !== idx) {
+          if (startIndex !== idx) {
             const ST = item._scrollTop || 0;
             if (ST > 0) {
               // 有记录
@@ -189,61 +199,61 @@ export default {
         } else {
           // 不吸顶 case
           item._marginTop = 0;
-          item._height = 'auto';
-          item._overflow = 'visible';
         }
-
-        const page = Array.from(this.$refs['slide'].children[0].children)[idx];
-        page.style.marginTop = item._marginTop;
-        page.style.height = item._height;
-        page.style.overflow = item._overflow;
+        console.log(idx, item._marginTop);
+        pages[idx].style.marginTop = item._marginTop + 'px';
+        pages[idx].setAttribute('class', 'h-auto');
       });
     },
 
-    handleEnd() {
-      console.log('handleEnd');
+    handleEnd(e) {
       // 此时activeIndex已指向目的页面
-      if (this.showSticky) {
+      if (this.handleEnd.did) return;
+      this.handleEnd.did = true;
+
+      console.log('handleEnd', this.activeIndex, this.arrivedTop);
+
+      this.updateHeight(); // 更新高度
+      const pages = Array.from(this.$refs['slide-content'].children);
+
+      if (this.arrivedTop) {
         // 吸顶,
         const scrollTop = Math.round(this.ST - this.tabs[this.activeIndex]._marginTop);
         const minScrollTop =
           cache('slideOT', this.getSlideOffsetTop.bind(this)) - this.$refs['nav'].offsetHeight - this.stickyTop;
-        this.bsBody.scrollTo(0, -Math.max(scrollTop, minScrollTop), 0);
 
         this.tabs.forEach((item, idx) => {
+          let className = 'h-zero';
           if (this.activeIndex !== idx) {
             const ST = item._scrollTop || 0;
             if (ST > 0) {
               // 有记录
               item._marginTop = scrollTop - item._scrollTop;
             } else {
-              item._marginTop = scrollTop + this.$refs['nav'].offsetHeight - minScrollTop - ST;
+              item._marginTop = scrollTop - minScrollTop - ST;
             }
-            item._height = '0';
-            item._overflow = 'hidden';
           } else {
             item._marginTop = 0;
-            item._height = 'auto';
-            item._overflow = 'visible';
+            className = 'h-auto';
           }
+          pages[idx].style.marginTop = item._marginTop + 'px';
+          pages[idx].setAttribute('class', className);
+        });
+        this.$nextTick(() => {
+          this.bsBody.scrollTo(0, -Math.max(scrollTop, minScrollTop), 0); // 这个地方会触发 scroll 事件
         });
       } else {
         this.tabs.forEach((item, idx) => {
           // 不吸顶 状态下 marginTop 都为0， 不用操作滚动
           item._marginTop = 0;
+          let className = 'h-zero';
           if (this.activeIndex === idx) {
-            item._height = 'auto';
-            item._overflow = 'visible';
-          } else {
-            item._height = '0';
-            item._overflow = 'hidden';
+            className = 'h-auto';
           }
+          pages[idx].style.marginTop = 0;
+          pages[idx].setAttribute('class', className);
         });
       }
-
-      this.$nextTick(() => {
-        this.updateHeight();
-      });
     },
 
     getSlideOffsetTop() {
@@ -251,9 +261,15 @@ export default {
     },
 
     updateHeight() {
-      const activePage = this.$refs['slide'].children[0].children[this.activeIndex].children[0];
+      const activePage = Array.from(this.$refs['slide-content'].children)[this.activeIndex];
       this.slideHeight = activePage.offsetHeight + 'px';
+      console.log('updateHeight-fn', this.activeIndex);
       this.refresh();
+    },
+    goToPage(startIndex, endIndex) {
+      this.handleStart(startIndex);
+      this.bsSlide.goToPage(endIndex, 0, 300);
+      this.handleEnd();
     },
   },
 };
@@ -261,8 +277,15 @@ export default {
 <style lang="scss" scoped>
 .multi-tab {
   position: relative;
-  .hidden-sticky {
-    transform: translateX(-1000%);
+  .nav0 {
+    position: absolute;
+    top: 0;
+    transform: translateX(-500%);
+    z-index: 99;
+    width: 100%;
+    &.show {
+      transform: translateX(0%);
+    }
   }
 }
 .body-wrapper {
@@ -277,11 +300,19 @@ export default {
   z-index: 0;
   .slide-content {
     display: flex;
+    align-items: flex-start;
     flex-wrap: nowrap;
     .slide-page {
-      min-height: 100vh;
       width: 100vw;
       overflow: hidden;
+      &.h-auto {
+        height: 'auto';
+        overflow: 'visible';
+      }
+      &.h-zero {
+        height: '0';
+        overflow: 'hidden';
+      }
     }
   }
 }

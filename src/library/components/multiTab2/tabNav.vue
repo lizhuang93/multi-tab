@@ -3,7 +3,6 @@
     class="nav-wrapper"
     ref="tabNav"
     v-if="tabs.length > 0"
-    :class="{ 'is-sticky': isSticky }"
     :style="{
       top: `${stickyTop}px`,
     }"
@@ -55,6 +54,7 @@ export default {
   watch: {
     value(newVal, oldVal) {
       this.animate();
+      console.log('value---change3');
     },
   },
   mounted() {
@@ -84,7 +84,6 @@ export default {
         const contentOffsetWidth = tabNavEl.querySelector('.nav-content').offsetWidth;
         const list = Array.from(tabNavEl.querySelectorAll('.item'));
         const item = list[this.value];
-
         if (!item) return;
         const { offsetWidth: tabsWidth } = tabNavEl;
         const { offsetLeft, offsetWidth: itemWidth } = item;
@@ -113,10 +112,6 @@ export default {
   padding-top: 6px;
   background: #fff;
   white-space: nowrap;
-}
-.is-sticky {
-  position: absolute;
-  top: 0;
 }
 .nav-content {
   display: inline-block;
