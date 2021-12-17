@@ -1,19 +1,12 @@
 <template>
   <div id="">
-    <ex-tabs :tabList="tabList" v-model="tabIndex">
+    <ex-tabs :tabList="tabList" v-model="tabIndex" @click="onClick">
       <div slot="header" style="height:50px;background:#a8a8a8;position:sticky;top:0">
         fsa
       </div>
-      <!-- <div slot="nav">fas</div> -->
-      <div
-        v-for="(item, index) in tabList"
-        :slot="index"
-        :key="index"
-        :style="`background: #${index + 5}${index + 5}${index + 5}`"
-      >
-        <div>
-          <p v-for="n in item.count" :key="n">{{ n }} ---------------------- page{{ index }}-{{ n }}</p>
-        </div>
+      <!-- <div slot="nav">自定义tabs</div> -->
+      <div v-for="(item, index) in tabList" :slot="index" :key="index" style="min-height: 1px">
+        <page :ref="`page${index}`"></page>
       </div>
     </ex-tabs>
   </div>
@@ -21,10 +14,11 @@
 
 <script>
 import Tabs from '../index.vue';
-
+import page from './page.vue';
 export default {
   components: {
     'ex-tabs': Tabs,
+    page,
   },
   props: {},
   data() {
@@ -87,9 +81,25 @@ export default {
 
   computed: {},
 
-  mounted() {},
+  mounted() {
+    this.onClick(0);
+  },
 
-  methods: {},
+  methods: {
+    onClick(index) {
+      console.log('click-tab', index);
+      // console.log(this.$refs[`page${index}`]);
+      if (this.$refs[`page${index}`][0].list.length === 0) {
+        this.$refs[`page${index}`][0].init();
+      }
+      this.$refs[`page${index}`][0].recover();
+      this.tabList.forEach((item, idx) => {
+        if (this.tabIndex !== idx && this.$refs[`page${idx}`]) {
+          this.$refs[`page${idx}`][0].stop();
+        }
+      });
+    },
+  },
 };
 </script>
 

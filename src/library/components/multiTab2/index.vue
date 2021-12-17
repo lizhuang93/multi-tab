@@ -48,11 +48,15 @@
   </div>
 </template>
 <script>
+import Vue from 'vue';
 import BScroll from '@better-scroll/core';
 import NestedScroll from '@better-scroll/nested-scroll';
 import Slide from '@better-scroll/slide';
+import Pullup from '@better-scroll/pull-up';
+
 BScroll.use(NestedScroll);
 BScroll.use(Slide);
+BScroll.use(Pullup);
 
 import TabNav from './tabNav.vue';
 import { cache, getOffset } from './utils/helper';
@@ -102,8 +106,17 @@ export default {
     }
   },
   mounted() {
-    this.$nextTick(() => {
-      this.bsBody = new BScroll(this.$refs['body-wrapper'], {
+    this.initBody();
+    this.initSlide();
+    this.updateHeight();
+  },
+  destroyed() {
+    Vue.prototype.bsBody.destroy();
+    this.bsSlide.destroy();
+  },
+  methods: {
+    initBody() {
+      Vue.prototype.bsBody = new BScroll(this.$refs['body-wrapper'], {
         scrollX: false,
         scrollY: true,
         click: true,
@@ -114,14 +127,19 @@ export default {
         nestedScroll: {
           groupId: 'shared',
         },
+        pullUpLoad: {
+          threshold: 300,
+        },
       });
 
-      this.bsBody.on('scroll', position => {
+      Vue.prototype.bsBody.on('scroll', position => {
         const headerHeight = this.$refs['header'].offsetHeight;
         this.arrivedTop = position.y <= this.stickyTop && Math.abs(position.y) >= headerHeight - this.stickyTop;
-        console.log('setArrivedTop', this.arrivedTop);
       });
-
+      console.log('初始化body，init-body');
+      Vue.prototype.bsBody.updateHeight = this.updateHeight;
+    },
+    initSlide() {
       this.bsSlide = new BScroll(this.$refs['slide'], {
         scrollX: true,
         scrollY: false,
@@ -145,15 +163,7 @@ export default {
       this.bsSlide.on('scrollStart', this.handleStart);
       this.bsSlide.on('scrollEnd', this.handleEnd);
       this.bsSlide.on('scrollCancel', this.handleEnd);
-
-      this.updateHeight();
-    });
-  },
-  destroyed() {
-    this.bsBody.destroy();
-    this.bsSlide.destroy();
-  },
-  methods: {
+    },
     setIndex(index, isClick = true) {
       if (index === this.activeIndex) return;
 
@@ -166,17 +176,16 @@ export default {
       }
     },
     refresh() {
-      if (this.bsBody) {
+      if (Vue.prototype.bsBody) {
         this.$nextTick(() => {
-          this.bsBody.refresh();
+          Vue.prototype.bsBody.refresh();
         });
       }
     },
     handleStart(startIndex = this.activeIndex) {
       this.handleEnd.did = false;
       console.log('handleStart');
-      this.ST = Math.abs(this.bsBody.y);
-      console.log('this.ST->', this.ST);
+      this.ST = Math.abs(Vue.prototype.bsBody.y);
       const slideOffsetTop =
         cache('slideOT', this.getSlideOffsetTop.bind(this)) - this.$refs['nav'].offsetHeight - this.stickyTop;
       const pages = Array.from(this.$refs['slide-content'].children);
@@ -200,7 +209,6 @@ export default {
           // 不吸顶 case
           item._marginTop = 0;
         }
-        console.log(idx, item._marginTop);
         pages[idx].style.marginTop = item._marginTop + 'px';
         pages[idx].setAttribute('class', 'h-auto');
       });
@@ -211,7 +219,7 @@ export default {
       if (this.handleEnd.did) return;
       this.handleEnd.did = true;
 
-      console.log('handleEnd', this.activeIndex, this.arrivedTop);
+      console.log('handleEnd');
 
       this.updateHeight(); // 更新高度
       const pages = Array.from(this.$refs['slide-content'].children);
@@ -240,7 +248,7 @@ export default {
           pages[idx].setAttribute('class', className);
         });
         this.$nextTick(() => {
-          this.bsBody.scrollTo(0, -Math.max(scrollTop, minScrollTop), 0); // 这个地方会触发 scroll 事件
+          Vue.prototype.bsBody.scrollTo(0, -Math.max(scrollTop, minScrollTop), 0); // 这个地方会触发 scroll 事件
         });
       } else {
         this.tabs.forEach((item, idx) => {
@@ -263,7 +271,7 @@ export default {
     updateHeight() {
       const activePage = Array.from(this.$refs['slide-content'].children)[this.activeIndex];
       this.slideHeight = activePage.offsetHeight + 'px';
-      console.log('updateHeight-fn', this.activeIndex);
+      console.log('更新高度, 当前tab：', this.activeIndex);
       this.refresh();
     },
     goToPage(startIndex, endIndex) {
