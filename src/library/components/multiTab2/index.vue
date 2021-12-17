@@ -2,7 +2,7 @@
   <div class="multi-tab">
     <!-- 吸顶的时候展示 -->
     <!-- 导航区 -->
-    <div v-if="isSticky" class="nav0" :class="{ show: arrivedTop }">
+    <div v-if="isSticky" class="nav0" :class="{ show: showNav, trans: isArrivedTop && tidy }">
       <slot name="nav" v-if="$slots.nav"></slot>
       <tab-nav
         v-else
@@ -75,7 +75,8 @@ export default {
   },
   data() {
     return {
-      arrivedTop: false,
+      isArrivedTop: false, // 到达顶部
+      isShowNav: false, // 吸顶后， 展示Nav
       activeIndex: -1,
       tabs: [],
       bsBody: null,
@@ -85,6 +86,15 @@ export default {
     };
   },
   computed: {
+    showNav() {
+      if (this.tidy) {
+        return this.isShowNav && this.isArrivedTop;
+      }
+      if (this.isSticky) {
+        return this.isArrivedTop;
+      }
+      return false;
+    },
     rollerWidth() {
       return `${this.tabs.length * 100}%`;
     },
@@ -111,12 +121,12 @@ export default {
     this.updateHeight();
   },
   destroyed() {
-    Vue.prototype.bsBody.destroy();
+    this.bsBody.destroy();
     this.bsSlide.destroy();
   },
   methods: {
     initBody() {
-      Vue.prototype.bsBody = new BScroll(this.$refs['body-wrapper'], {
+      this.bsBody = new BScroll(this.$refs['body-wrapper'], {
         scrollX: false,
         scrollY: true,
         click: true,
@@ -132,12 +142,17 @@ export default {
         },
       });
 
-      Vue.prototype.bsBody.on('scroll', position => {
+      this.bsBody.on('scroll', position => {
         const headerHeight = this.$refs['header'].offsetHeight;
-        this.arrivedTop = position.y <= this.stickyTop && Math.abs(position.y) >= headerHeight - this.stickyTop;
+        this.isArrivedTop = position.y <= this.stickyTop && Math.abs(position.y) >= headerHeight - this.stickyTop;
+        if (this.tidy) {
+          this.handleNav();
+        }
       });
+
       console.log('初始化body，init-body');
-      Vue.prototype.bsBody.updateHeight = this.updateHeight;
+      this.bsBody.updateHeight = this.updateHeight;
+      Vue.prototype.bsBody = this.bsBody;
     },
     initSlide() {
       this.bsSlide = new BScroll(this.$refs['slide'], {
@@ -175,17 +190,10 @@ export default {
         this.goToPage(startIndex, index);
       }
     },
-    refresh() {
-      if (Vue.prototype.bsBody) {
-        this.$nextTick(() => {
-          Vue.prototype.bsBody.refresh();
-        });
-      }
-    },
     handleStart(startIndex = this.activeIndex) {
       this.handleEnd.did = false;
       console.log('handleStart');
-      this.ST = Math.abs(Vue.prototype.bsBody.y);
+      this.ST = Math.abs(this.bsBody.y);
       const slideOffsetTop =
         cache('slideOT', this.getSlideOffsetTop.bind(this)) - this.$refs['nav'].offsetHeight - this.stickyTop;
       const pages = Array.from(this.$refs['slide-content'].children);
@@ -194,7 +202,7 @@ export default {
           // 记录自己位置
           item._scrollTop = this.ST;
         }
-        if (this.arrivedTop) {
+        if (this.isArrivedTop) {
           // 吸顶, 处理其他page
           if (startIndex !== idx) {
             const ST = item._scrollTop || 0;
@@ -224,7 +232,7 @@ export default {
       this.updateHeight(); // 更新高度
       const pages = Array.from(this.$refs['slide-content'].children);
 
-      if (this.arrivedTop) {
+      if (this.isArrivedTop) {
         // 吸顶,
         const scrollTop = Math.round(this.ST - this.tabs[this.activeIndex]._marginTop);
         const minScrollTop =
@@ -248,7 +256,7 @@ export default {
           pages[idx].setAttribute('class', className);
         });
         this.$nextTick(() => {
-          Vue.prototype.bsBody.scrollTo(0, -Math.max(scrollTop, minScrollTop), 0); // 这个地方会触发 scroll 事件
+          this.bsBody.scrollTo(0, -Math.max(scrollTop, minScrollTop), 0); // 这个地方会触发 scroll 事件
         });
       } else {
         this.tabs.forEach((item, idx) => {
@@ -272,12 +280,28 @@ export default {
       const activePage = Array.from(this.$refs['slide-content'].children)[this.activeIndex];
       this.slideHeight = activePage.offsetHeight + 'px';
       console.log('更新高度, 当前tab：', this.activeIndex);
-      this.refresh();
+      if (this.bsBody) {
+        this.$nextTick(() => {
+          this.bsBody.refresh();
+        });
+      }
     },
     goToPage(startIndex, endIndex) {
       this.handleStart(startIndex);
       this.bsSlide.goToPage(endIndex, 0, 300);
       this.handleEnd();
+    },
+
+    handleNav() {
+      const y = this.bsBody.movingDirectionY;
+      console.log(y);
+      if (y === 1) {
+        // 手指上滑
+        this.isShowNav = false;
+      } else if (y === -1) {
+        // 手指下滑
+        this.isShowNav = true;
+      }
     },
   },
 };
@@ -288,11 +312,14 @@ export default {
   .nav0 {
     position: absolute;
     top: 0;
-    transform: translateX(-500%);
     z-index: 99;
     width: 100%;
+    transform: translateY(-1000%);
     &.show {
-      transform: translateX(0%);
+      transform: translateY(0%);
+    }
+    &.trans {
+      transition: transform 0.4s linear;
     }
   }
 }
