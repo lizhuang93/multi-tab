@@ -8,7 +8,7 @@
 
 ## 说明
 基于better-scroll实现。
-只接入了上拉刷新功能，需要更多功能请看 [https://better-scroll.github.io/docs/zh-CN/plugins/](https://better-scroll.github.io/docs/zh-CN/plugins/)
+只接入了上拉加载更多的功能，需要更多功能请看 [https://better-scroll.github.io/docs/zh-CN/plugins/](https://better-scroll.github.io/docs/zh-CN/plugins/)
 
 ## 使用方式
 见源码 src/library/components/multiTab/demo
