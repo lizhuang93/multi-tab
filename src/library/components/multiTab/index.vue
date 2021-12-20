@@ -69,7 +69,7 @@ export default {
     value: { type: Number, default: 0 },
     tabList: { type: Array, default: () => [] }, // tabs
     isSticky: { type: Boolean, default: true }, // 开启自动吸顶
-    tidy: { type: Boolean, default: true }, // 吸顶的前提下，开启 上滑自动隐藏tab，下滑自动展示tab功能。
+    tidy: { type: Boolean, default: false }, // 吸顶的前提下，开启 上滑自动隐藏tab，下滑自动展示tab功能。
     stickyTop: { type: Number, default: 0 }, // null 不做吸顶
     stopPropagation: { type: Boolean, default: false }, // 阻止冒泡
   },
@@ -287,7 +287,7 @@ export default {
 
     updateHeight() {
       const activePage = Array.from(this.$refs['slide-content'].children)[this.activeIndex];
-      this.slideHeight = activePage.offsetHeight + 'px';
+      this.slideHeight = activePage.offsetHeight + 60 + 'px';
       console.log('更新高度, 当前tab页：', this.activeIndex);
       if (this.bsBody) {
         this.$nextTick(() => {

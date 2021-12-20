@@ -1,7 +1,7 @@
 <template>
-  <div id="" style="background: #efefef">
-    <p v-for="(item, idx) in list" :key="idx">{{ idx }}------{{ item }}</p>
-    <p v-if="isLoading" style="min-height:100vh">加载中...</p>
+  <div id="" style="background: #fefefe">
+    <p v-for="(item, idx) in list" :key="idx">{{ idx }}---------------------------</p>
+    <p v-if="isLoading" style="min-height:100vh;text-align: center; padding-top: 10px">加载中...</p>
   </div>
 </template>
 
@@ -46,7 +46,7 @@ export default {
           console.log('load-0');
           this.bsBody.updateHeight();
         });
-      }, 300);
+      }, 1000);
     },
   },
 };

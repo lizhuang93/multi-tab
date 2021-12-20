@@ -1,8 +1,11 @@
 <template>
   <div id="">
     <ex-tabs :tabList="tabList" v-model="tabIndex" @click="onClick">
-      <div slot="header" style="height:50px;background:#a8a8a8;position:sticky;top:0">
-        fsa
+      <div
+        slot="header"
+        style="height:150px;background:#a8a8a8;position:sticky;top:0; display:flex;justify-content: center;align-items: center;"
+      >
+        1111 222 333
       </div>
       <!-- <div slot="nav">自定义tabs</div> -->
       <div v-for="(item, index) in tabList" :slot="index" :key="index" style="min-height: 1px">
