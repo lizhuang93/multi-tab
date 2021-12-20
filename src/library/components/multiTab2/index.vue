@@ -88,6 +88,7 @@ export default {
   computed: {
     showNav() {
       if (this.tidy) {
+        // 吸顶的情况下, 才考虑 tidy 效果
         return this.isShowNav && this.isArrivedTop;
       }
       if (this.isSticky) {
@@ -102,6 +103,10 @@ export default {
   watch: {
     activeIndex(newVal, oldVal) {
       this.updateHeight();
+    },
+    'bsSlide.enabled': function(newVal, oldVal) {
+      // 打印出来看看而已。
+      console.log('bsSlide.enabled', newVal, oldVal);
     },
   },
   created() {
@@ -148,6 +153,10 @@ export default {
         if (this.tidy) {
           this.handleNav();
         }
+      });
+
+      this.bsBody.on('touchEnd', () => {
+        this.handleSlide();
       });
 
       console.log('初始化body，init-body');
@@ -279,7 +288,7 @@ export default {
     updateHeight() {
       const activePage = Array.from(this.$refs['slide-content'].children)[this.activeIndex];
       this.slideHeight = activePage.offsetHeight + 'px';
-      console.log('更新高度, 当前tab：', this.activeIndex);
+      console.log('更新高度, 当前tab页：', this.activeIndex);
       if (this.bsBody) {
         this.$nextTick(() => {
           this.bsBody.refresh();
@@ -301,6 +310,15 @@ export default {
       } else if (y === -1) {
         // 手指下滑
         this.isShowNav = true;
+      }
+    },
+    // 处理slide能否侧滑，
+    handleSlide() {
+      // 可以滑动: 1. 还未吸顶，2. 吸顶，nav 漏出
+      if (!this.isArrivedTop || this.showNav) {
+        this.bsSlide.enable();
+      } else {
+        this.bsSlide.disable();
       }
     },
   },
