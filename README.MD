@@ -1,90 +1,49 @@
 ## 在线演示
-[http://39.98.139.162:3000/demo](http://39.98.139.162:3000/demo)
-
-## 使用方式
-
-npm i huge-tree --save
-或
-yarn add huge-tree -D
-
-### 全局使用
-```
-// main.js， 
-import BTM from 'huge-tree'
-Vue.use(BTM)
-
-// demo1.vue, 使用 huge-tree
-<btm-huge-tree><btm-huge-tree/>
-
-// demo2.vue 使用 huge-list
-<btm-huge-list></btm-huge-list>
-```
-
-### 按需使用
-```
-// 
-import { HugeTree, HugeList } from 'huge-tree'
-Vue.use(HugeTree)
-Vue.use(HugeList)
-```
-
-### 组件内部使用
-```
-// demo.vue, 
-<template>
-  <div>
-    <btm-huge-tree></btm-huge-tree>
-  </div>
-</template>
-
-<script>
-import { HugeTree } from 'huge-tree'
-
-export default {
-  components: {
-    'btm-huge-tree': HugeTree
-  }
-}
-</script>
-```
-
-## Doc
-参见 github 各 demo<br>
-[huge-tree 使用doc](https://github.com/bitmain-frontend/huge-tree/tree/master/src/library/components/hugeTree/demo)<br>
-[huge-list 使用doc](https://github.com/bitmain-frontend/huge-tree/tree/master/src/library/components/hugeList/demo)
-
-
-
+[http://39.98.139.162:3001/demo](http://39.98.139.162:3001/demo)
 ## 本地运行
 1. git clone
 2. yarn install
 3. yarn dev
-4. yarn mock:api // 再开一个窗口执行此命令，两个node服务都跑起来。
-5. 0.0.0.0:8000
+4. 0.0.0.0:8000
+
+## 说明
+基于better-scroll实现。
+只接入了上拉刷新功能，需要更多功能请看 [https://better-scroll.github.io/docs/zh-CN/plugins/](https://better-scroll.github.io/docs/zh-CN/plugins/)
+
+## 使用方式
+见源码 src/library/components/multiTab/demo
+
+## Attributes
+
+| 参数            | 说明        | 类型           | 可选值      | 默认值               |
+| ------------ | -------------------- | -------------- | -------------------------- | -------------------- |
+| v-model        | 当前选中的tab下标 | Number        | --         | 0                |
+| tabList        | tabs数组 | Array        | --         | []                |
+| isSticky        | 自动吸顶 | Boolean        | --         | true                |
+| tidy        | 吸顶的前提下，开启 上滑自动隐藏tab，下滑自动展示tab功能。 | Boolean        | --         | false                |
+| stickyTop        | 吸顶距离 | Number        | --         | 0                |
+   
+## 方法
+将bsBody挂载到了Vue，子组件可之间this.bsBody使用。
+Vue.prototype.bsBody = this.bsBody;
+【注意】当tab页高度变化时，请调用 ```this.bsBody.updateHeight();```
+
+## Events
+
+| 事件名称        | 说明                                   | 回调参数                         |
+| --------------- | -------------------------------------- | -------------------------------- |
+| click        | 点击tab触发                       | index |
+
+## Scoped Slot
+
+| name      | 说明                                                                                                |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| header   | tab以上部分的slot， eg： `<div slot="header">HEADER</div>` |
+| nav | 自定义的nav， eg： `<div slot="nav"></div>`                               |
+| ${index}   | 0-n, 嵌入每一页， eg： ```<div v-for="(item, index) in tabList" :slot="index" :key="index" style="min-height: 1px"><page :ref="`page${index}`"></page></div>```                                         |
 
 
-## 打包为umd类型的js-hugeTree.js
-```
-运行 yarn build-library 将生成dist/huge-tree.js
+## 参考
+[https://juejin.cn/post/7008356543444254757](https://juejin.cn/post/7008356543444254757)
+[https://market.m.taobao.com/app/idleFish-F2e/mini-3c/home.html](https://market.m.taobao.com/app/idleFish-F2e/mini-3c/home.html)
 
-// 使用
-<!DOCTYPE html>
-<html>
-
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>huge-tree</title>
-  <script src="**/**/huge-tree.js"></script>
-</head>
-
-<body>
-  <script>
-    console.log(hugeTree)
-  </script>
-</body>
-
-</html>
-
-
-```
