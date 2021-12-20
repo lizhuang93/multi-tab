@@ -1,34 +1,24 @@
 <template>
   <div id="">
-    <div ref="wrap" style="height:400px;background:#ccc">
-      <div>
-        <section>
-          <p ref="content" style="height:200px;background:#eee"></p>
-        </section>
+    <ex-tabs :tabList="tabList" v-model="tabIndex" @click="onClick">
+      <div slot="header" style="height:50px;background:#a8a8a8;position:sticky;top:0">
+        fsa
       </div>
-    </div>
-    <!-- <div style="height:50px;background:#a8a8a8;position:sticky;top:0"></div> -->
-    <!-- <ex-tabs :tabList="tabList" v-model="tabIndex">
-      <div
-        v-for="(item, index) in tabList"
-        :slot="index"
-        :key="index"
-        :style="`background: #${index + 5}${index + 5}${index + 5}`"
-      >
-        <div>
-          <p v-for="n in item.count" :key="n">page{{ index }} -------------------------- {{ n }}</p>
-        </div>
+      <!-- <div slot="nav">自定义tabs</div> -->
+      <div v-for="(item, index) in tabList" :slot="index" :key="index" style="min-height: 1px">
+        <page :ref="`page${index}`"></page>
       </div>
-    </ex-tabs> -->
+    </ex-tabs>
   </div>
 </template>
 
 <script>
 import Tabs from '../index.vue';
-
+import page from './page.vue';
 export default {
   components: {
-    // 'ex-tabs': Tabs,
+    'ex-tabs': Tabs,
+    page,
   },
   props: {},
   data() {
@@ -37,7 +27,7 @@ export default {
         {
           label: '财经',
           code: 'CJ',
-          count: 500,
+          count: 50,
         },
         {
           label: '科技2',
@@ -92,24 +82,22 @@ export default {
   computed: {},
 
   mounted() {
-    this.$refs.content.addEventListener('touchstart', e => {
-      console.log('content', e);
-      e.stopPropagation();
-    });
-    this.$refs.wrap.addEventListener(
-      'touchstart',
-      e => {
-        console.log('wrap', e);
-      },
-      true
-    );
+    this.onClick(0);
   },
 
   methods: {
-    handle() {
-      this.$refs.page.style.marginTop = 0;
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+    onClick(index) {
+      console.log('click-tab', index);
+      // console.log(this.$refs[`page${index}`]);
+      if (this.$refs[`page${index}`][0].list.length === 0) {
+        this.$refs[`page${index}`][0].init();
+      }
+      this.$refs[`page${index}`][0].recover();
+      this.tabList.forEach((item, idx) => {
+        if (this.tabIndex !== idx && this.$refs[`page${idx}`]) {
+          this.$refs[`page${idx}`][0].stop();
+        }
+      });
     },
   },
 };

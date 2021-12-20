@@ -1,6 +1,5 @@
 const Nav = () => import(/* webpackChunkName: 'demo' */ './nav');
 const MultiTab = () => import(/* webpackChunkName: 'demo' */ './components/multiTab/demo');
-const MultiTab2 = () => import(/* webpackChunkName: 'demo' */ './components/multiTab2/demo');
 
 const routes = [
   {
@@ -12,11 +11,6 @@ const routes = [
     path: 'multiTab',
     name: 'multiTab',
     component: MultiTab,
-  },
-  {
-    path: 'multiTab2',
-    name: 'multiTab2',
-    component: MultiTab2,
   },
 ];
 

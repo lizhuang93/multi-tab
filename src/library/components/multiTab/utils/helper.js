@@ -1,29 +1,3 @@
-// 初始化数据
-export const formatTabs = tabs => {
-  return tabs.map(item => {
-    return {
-      _marginTop: 0,
-      _height: 'auto',
-      _marginTop: 0,
-      ...item,
-    };
-  });
-};
-
-// 洗一下数据
-export const handleTabs = (tabs, tabIndex, { showAll = false } = {}) => {
-  tabs.forEach((tab, idx) => {
-    if (idx === tabIndex || showAll) {
-      tab._height = 'auto';
-      tab._overflow = 'visible';
-    } else {
-      tab._height = 0;
-      tab._overflow = 'hidden';
-    }
-  });
-  // console.log('tabs->', tabs);
-};
-
 export const throttle = (fn, delay = 100) => {
   let last = 0;
   return function(...args) {
@@ -59,3 +33,12 @@ export function getOffset(child, parent) {
 
   return { left, top };
 }
+
+// 避免重复计算
+export const cache = (() => {
+  let obj = {};
+  return (key, fn) => {
+    if (obj.hasOwnProperty(key)) return obj[key];
+    return fn();
+  };
+})();

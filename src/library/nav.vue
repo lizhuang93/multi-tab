@@ -19,10 +19,6 @@ export default {
           path: '/demo/multiTab',
           text: '多Tab多滚动容器',
         },
-        {
-          path: '/demo/multiTab2',
-          text: '多Tab多滚动容器2',
-        },
       ],
     };
   },
