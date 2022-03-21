@@ -1,5 +1,7 @@
+多tab滚动容器，基于better-scroll实现，支持位置保持，侧滑切tab，tab自动吸顶等功能。
 ## 在线演示
 [http://39.98.139.162:3001/demo](http://39.98.139.162:3001/demo)
+![](./zaixianyulan.jpg)
 ## 本地运行
 1. git clone
 2. yarn install
@@ -10,8 +12,32 @@
 基于better-scroll实现。
 只接入了上拉加载更多的功能，需要更多功能请看 [https://better-scroll.github.io/docs/zh-CN/plugins/](https://better-scroll.github.io/docs/zh-CN/plugins/)
 
-## 使用方式
-见源码 src/library/components/multiTab/demo
+## 接入
+npm i huge-tree --save 或 yarn add huge-tree -D
+```
+<multi-tab :tabList="tabList" v-model="tabIndex" @click="onClick">
+  <div
+    slot="header"
+    style="height:150px;background:#a8a8a8;position:sticky;top:0; display:flex;justify-content: center;align-items: center;"
+  >
+    header区域
+  </div>
+  <!-- <div slot="nav">自定义tabs</div> -->
+  <div v-for="(item, index) in tabList" :slot="index" :key="index" style="min-height: 1px">
+    <page :ref="`page${index}`"></page>
+  </div>
+</multi-tab>
+
+import MultiTab from 'multi-tab'
+export default {
+  components: {
+    'multi-tab': MultiTab
+  }
+}
+```
+
+## 参考demo
+[src/library/components/multiTab/demo](https://github.com/lizhuang93/multi-tab/blob/master/src/library/components/multiTab/demo/index.vue)
 
 ## Attributes
 

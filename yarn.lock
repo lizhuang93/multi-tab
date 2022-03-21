@@ -5051,6 +5051,19 @@ ms@2.1.1, ms@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.1.tgz#30a5864eb3ebb0a66f2ebe6d727af06a09d86e0a"
 
+multi-tab@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/multi-tab/-/multi-tab-1.0.0.tgz#d941f9c7c3e34f2e79ed8b0699530a9cafdd1f40"
+  integrity sha512-LVEh+v2V5r5K5+9N/IqzZUoZtxch39vOTnhEgJS9Nmhz8tMRWe7WNfma0Xg/ABWlYUGfpm6vtU3clK35b1Hm/g==
+  dependencies:
+    "@better-scroll/core" "^2.4.2"
+    "@better-scroll/nested-scroll" "^2.4.2"
+    "@better-scroll/pull-up" "^2.4.2"
+    "@better-scroll/slide" "^2.4.2"
+    axios "^0.19.0"
+    vue "^2.6.10"
+    vue-router "^3.0.6"
+
 multicast-dns-service-types@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/multicast-dns-service-types/-/multicast-dns-service-types-1.1.0.tgz#899f11d9686e5e05cb91b35d5f0e63b773cfc901"

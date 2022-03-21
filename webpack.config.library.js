@@ -18,8 +18,8 @@ module.exports = {
 
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: 'huge-tree.js',
-    library: 'hugeTree',
+    filename: 'multi-tab.js',
+    library: 'multiTab',
     libraryTarget: 'umd',
     libraryExport: 'default', // 增加这个属性
   },

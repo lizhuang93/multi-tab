@@ -1,6 +1,6 @@
 <template>
   <div id="">
-    <ex-tabs :tabList="tabList" v-model="tabIndex" @click="onClick">
+    <multi-tab :tabList="tabList" v-model="tabIndex" @click="onClick">
       <div
         slot="header"
         style="height:150px;background:#a8a8a8;position:sticky;top:0; display:flex;justify-content: center;align-items: center;"
@@ -11,16 +11,17 @@
       <div v-for="(item, index) in tabList" :slot="index" :key="index" style="min-height: 1px">
         <page :ref="`page${index}`"></page>
       </div>
-    </ex-tabs>
+    </multi-tab>
   </div>
 </template>
 
 <script>
-import Tabs from '../index.vue';
+import MultiTab from '../index.vue'; // 使用本地
+// import MultiTab from 'multi-tab'; // 使用node_modules
 import page from './page.vue';
 export default {
   components: {
-    'ex-tabs': Tabs,
+    'multi-tab': MultiTab,
     page,
   },
   props: {},

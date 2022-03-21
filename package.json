@@ -1,19 +1,17 @@
 {
-  "name": "huge-tree",
-  "version": "2.0.1",
-  "description": "vue组件，海量数据 tree、list,支持20w+，虚拟滚动<br>",
+  "name": "multi-tab",
+  "version": "1.0.0",
+  "description": "vue组件，多容器tab，位置保持，侧滑，基于better-scroll，多tab滚动容器<br>",
   "keywords": [
-    "huge-tree",
-    "huge-tree-vue",
-    "tree",
-    "large-tree",
+    "multi-tab",
+    "tab",
+    "scroll",
+    "多容器tab",
     "vue",
-    "huge-list-vue",
-    "huge-list",
-    "list",
-    "large-list"
+    "位置保持",
+    "多tab滚动容器"
   ],
-  "main": "dist/huge-tree.js",
+  "main": "dist/multi-tab.js",
   "scripts": {
     "dev": "webpack-dev-server --inline --progress",
     "build": "cross-env NODE_ENV=production webpack",
@@ -95,6 +93,7 @@
     "@better-scroll/pull-up": "^2.4.2",
     "@better-scroll/slide": "^2.4.2",
     "axios": "^0.19.0",
+    "multi-tab": "^1.0.0",
     "vue": "^2.6.10",
     "vue-router": "^3.0.6"
   },
@@ -111,10 +110,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitmain-frontend/huge-tree.git"
+    "url": "git+https://github.com/lizhuang93/multi-tab.git"
   },
   "bugs": {
-    "url": "https://github.com/bitmain-frontend/huge-tree/issues"
+    "url": "https://github.com/lizhuang93/multi-tab/issues"
   },
-  "homepage": "https://github.com/bitmain-frontend/huge-tree#readme"
+  "homepage": "https://github.com/lizhuang93/multi-tab/blob/master/README.MD"
 }
