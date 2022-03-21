@@ -13,7 +13,7 @@
 只接入了上拉加载更多的功能，需要更多功能请看 [https://better-scroll.github.io/docs/zh-CN/plugins/](https://better-scroll.github.io/docs/zh-CN/plugins/)
 
 ## 接入
-npm i huge-tree --save 或 yarn add huge-tree -D
+npm i multi-tab --save 或 yarn add multi-tab -S
 ```
 <multi-tab :tabList="tabList" v-model="tabIndex" @click="onClick">
   <div

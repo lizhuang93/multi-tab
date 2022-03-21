@@ -1,6 +1,6 @@
 {
   "name": "multi-tab",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "vue组件，多容器tab，位置保持，侧滑，基于better-scroll，多tab滚动容器<br>",
   "keywords": [
     "multi-tab",
