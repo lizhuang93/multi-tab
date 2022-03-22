@@ -1,7 +1,7 @@
 多tab滚动容器，基于better-scroll实现，支持位置保持，侧滑切tab，tab自动吸顶等功能。
 ## 在线演示
+![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/43f927fac88e40baa10b6f34086245ca~tplv-k3u1fbpfcp-watermark.image?)<br/>
 [http://39.98.139.162:3001/demo](http://39.98.139.162:3001/demo)
-![](./zaixianyulan.jpg)
 ## 本地运行
 1. git clone
 2. yarn install
